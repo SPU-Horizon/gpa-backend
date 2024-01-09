@@ -1,4 +1,4 @@
-# Graduation Planning App Backend Overview
+# Graduation Planning App Back-End Overview
 
 This document provides an overview of the Graduation Planning App's backend component. The backend is developed using modern web technologies and supports the core functionality of the app, including integration with web scraping services for data collection.
 
