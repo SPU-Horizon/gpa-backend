@@ -2,11 +2,11 @@
 
 ## Back-End Overview
 
-This document provides an overview of the Graduation Planning App's backend component. The backend is developed using modern web technologies and supports the core functionality of the app, including integration with web scraping services for data collection.
+This document provides an overview of the Graduation Planning App's back-end component. The back-end is developed using modern web technologies and supports the app's core functionality, including integration with web scraping services for data collection.
 
 ## Project Purpose
 
-The Graduation Planning App is designed to assist students and academic advisors in managing and planning academic journeys. It provides tools for course scheduling, progress tracking, and graduation requirement analysis.
+The Graduation Planning App is designed to assist students and academic advisors manage and plan academic journeys. It provides tools for course scheduling, progress tracking, and graduation requirement analysis.
 
 ## Key Features
 
@@ -21,7 +21,7 @@ The Graduation Planning App is designed to assist students and academic advisors
 
 ## Technical Overview
 
-- **Built With**: The backend is built using Node.js and Express, popular technologies for server-side development.
+- **Built With**: The back-end is built using Node.js and Express, popular technologies for server-side development.
 - **Data Storage**: GPA uses a MySQL database for secure and efficient data storage.
 
 [https://main.dnqrtybjo5tlc.amplifyapp.com](https://main.dnqrtybjo5tlc.amplifyapp.com)
