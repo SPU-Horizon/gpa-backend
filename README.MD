@@ -1,4 +1,6 @@
-# Graduation Planning App Back-End Overview
+# The Graduation Planning App
+
+## Back-End Overview
 
 This document provides an overview of the Graduation Planning App's backend component. The backend is developed using modern web technologies and supports the core functionality of the app, including integration with web scraping services for data collection.
 
@@ -8,9 +10,9 @@ The Graduation Planning App is designed to assist students and academic advisors
 
 ## Key Features
 
-- **ScrapeStorm Integration**: Utilizes ScrapeStorm, a web scraping service, to gather relevant academic data.
-- **Data Management**: Processes and stores the scraped data for use in various app features.
-- **User-Friendly Interface**: Offers an easy-to-use interface for students and advisors to access and manage academic information.
+- **Automatic Web Scraping**: GPA can scrape numerous SPU sites to collect relevant course and student data.
+- **Data Management**: GPA processes and safely stores the user's data for use in various app features.
+- **User-Friendly Interface**: GPA is easy to use and beneficial for students and advisors in managing academic information.
 
 ## How to Use
 
@@ -20,5 +22,6 @@ The Graduation Planning App is designed to assist students and academic advisors
 ## Technical Overview
 
 - **Built With**: The backend is built using Node.js and Express, popular technologies for server-side development.
-- **Data Storage**: Uses a MySQL database hosted on AWS for secure and efficient data storage.
-- **API Integration**: Includes API integration with ScrapeStorm for automated data collection.
+- **Data Storage**: GPA uses a MySQL database for secure and efficient data storage.
+
+[https://main.dnqrtybjo5tlc.amplifyapp.com](https://main.dnqrtybjo5tlc.amplifyapp.com)

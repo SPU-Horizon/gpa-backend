@@ -6,7 +6,7 @@
  *              provide personalized recommendations for a smooth academic journey.
  *     Class: Software Engineering I, II, and Senior Capstone
  *     Academic Year: 2023 - 2024
- *     Author: Horizon Team
+ *     Author: Team Horizon
  */
 
 const express = require('express');
