@@ -12,10 +12,24 @@
 const express = require('express');
 const axios = require('axios');
 require('dotenv').config();
+const mysqlx = require('@mysql/xdevapi');
 
 const app = express();
 
 app.use(express.json());
+
+const config = {
+    password: 'QzbPjm34@WtV*yHNBDBy@MJMxNZ8CK_q',
+    user: 'root',
+    host: 'localhost',
+    port: 33060,
+    schema: 'gpa'
+};
+
+mysqlx.getSession(config)
+    .then(session => {
+        console.log(session.inspect());
+    });
 
 // Define the route to initiate a scrape
 app.get('/start-scrape/:taskId', async (req, res) => {
