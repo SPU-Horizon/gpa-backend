@@ -1,5 +1,8 @@
 # The Graduation Planning App
 
+> [!CAUTION]
+> Do not share the contents of this repository with anyone. Doing so may expose private user data to unauthorized persons and violate federal FERPA regulations. Do not share your screen with non-members or engage in reckless acts that may cause the contents of this repository to be discovered.
+
 ## Back-End Overview
 
 This document provides an overview of the Graduation Planning App's back-end component. The back-end is developed using modern web technologies and supports the app's core functionality, including integration with web scraping services for data collection.
