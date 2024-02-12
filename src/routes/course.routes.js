@@ -1,0 +1,8 @@
+const express = require('express');
+const router = express.Router();
+
+router.get('/classes', (req, res) => { 
+    res.send('courses:.....');
+});
+
+module.exports = router;

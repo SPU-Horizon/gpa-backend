@@ -18,6 +18,12 @@ const app = express();
 
 app.use(express.json());
 
+const userRoute = require('./src/routes/user.routes');
+const courseRoute = require('./src/routes/course.routes');
+app.use('/user', userRoute);
+//app.use('/course', courseRoute);
+
+
 const config = {
     password: 'QzbPjm34@WtV*yHNBDBy@MJMxNZ8CK_q',
     user: 'root',
