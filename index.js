@@ -21,7 +21,7 @@ app.use(express.json());
 const userRoute = require('./src/routes/user.routes');
 const courseRoute = require('./src/routes/course.routes');
 app.use('/user', userRoute);
-//app.use('/course', courseRoute);
+app.use('/course', courseRoute);
 
 
 const config = {
@@ -38,6 +38,7 @@ mysqlx.getSession(config)
     });
 
 // Define the route to initiate a scrape
+/*
 app.get('/start-scrape/:taskId', async (req, res) => {
     const taskId = req.params.taskId;
     const scrapeStormAPI = `http://our-scrapestorm-ip:80/rest/v1/task/${taskId}/start`; // Replace with actually ip address for the scrapestorm
@@ -50,6 +51,8 @@ app.get('/start-scrape/:taskId', async (req, res) => {
         res.status(500).json({ message: 'Failed to initiate scrape' });
     }
 });
+No longer in development
+*/
 
 // Start the server
 const PORT = process.env.PORT || 3000;
