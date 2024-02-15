@@ -18,3 +18,16 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 });
+
+async function getEnrollments(email) {
+    const [rows]  = await pool.query(`
+        SELECT student.student_id AS student_id, course_id, year, quarter, grade
+        FROM student
+        INNER JOIN enrollment ON student.student_id = enrollment.student_id
+        WHERE email = ?
+        `, [email]);
+
+        return rows;
+}
+
+module.exports = {getEnrollments};
