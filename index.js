@@ -12,7 +12,6 @@
 const express = require('express');
 const axios = require('axios');
 require('dotenv').config();
-const mysqlx = require('@mysql/xdevapi');
 
 const app = express();
 
@@ -23,37 +22,6 @@ const courseRoute = require('./src/routes/course.routes');
 app.use('/user', userRoute);
 app.use('/course', courseRoute);
 
-
-const config = {
-    password: 'QzbPjm34@WtV*yHNBDBy@MJMxNZ8CK_q',
-    user: 'root',
-    host: 'localhost',
-    port: 33060,
-    schema: 'gpa'
-};
-
-mysqlx.getSession(config)
-    .then(session => {
-        console.log(session.inspect());
-    });
-
-// Define the route to initiate a scrape
-/*
-app.get('/start-scrape/:taskId', async (req, res) => {
-    const taskId = req.params.taskId;
-    const scrapeStormAPI = `http://our-scrapestorm-ip:80/rest/v1/task/${taskId}/start`; // Replace with actually ip address for the scrapestorm
-
-    try {
-        const response = await axios.get(scrapeStormAPI);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error starting ScrapeStorm task:', error);
-        res.status(500).json({ message: 'Failed to initiate scrape' });
-    }
-});
-No longer in development
-*/
-
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
