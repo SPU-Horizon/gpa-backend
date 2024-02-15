@@ -21,9 +21,10 @@ const pool = mysql.createPool({
 
 async function getEnrollments(email) {
     const [rows]  = await pool.query(`
-        SELECT student.student_id AS student_id, course_id, year, quarter, grade
+        SELECT student.student_id AS student_id, course_id, name, description, credits, attributes, year, quarter, grade
         FROM student
         INNER JOIN enrollment ON student.student_id = enrollment.student_id
+        INNER JOIN course ON enrollment.course_id = course.course_id
         WHERE email = ?
         `, [email]);
 
