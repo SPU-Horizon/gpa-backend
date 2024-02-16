@@ -18,7 +18,7 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME
 });
 
-async function getEnrollments(email) {
+export async function getEnrollments(email) {
     const [rows]  = await pool.query(`
         SELECT student.student_id AS student_id, course_id, name, description, credits, attributes, year, quarter, grade
         FROM student
@@ -29,5 +29,3 @@ async function getEnrollments(email) {
 
         return rows;
 }
-
-module.exports = {getEnrollments};
