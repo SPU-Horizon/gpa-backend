@@ -29,3 +29,12 @@ export async function getEnrollments(email) {
 
         return rows;
 }
+
+export async function addStudent({first_name, last_name, email, avatar}) {
+    const [result] = await pool.query(`
+        INSERT INTO student (first_name, last_name, email, avatar)
+        VALUES (?, ?, ?, ?)
+        `, [first_name, last_name, email, avatar]);
+
+        return result.insertId;
+}
