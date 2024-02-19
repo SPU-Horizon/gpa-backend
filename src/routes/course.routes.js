@@ -7,6 +7,8 @@ const router = express.Router();
 //Course Routes
 router.get("/getCourses", course.getClasses);
 
+// Parse Course Routes
+// Parser currently needs fixing --- will remove comment once fixed
 router.post("/parseCourses", upload.single("file"), course.parseCourses);
 
 export default router;

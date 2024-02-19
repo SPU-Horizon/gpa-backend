@@ -14,6 +14,7 @@ export async function getClasses(req, res) {
 export async function parseCourses(req, res) {
   // Access the file through req.file
   const file = req.file;
+
   // Handle the file as needed
   console.log("Received file:", file);
 
