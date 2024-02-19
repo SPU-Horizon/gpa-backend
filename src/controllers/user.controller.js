@@ -1,8 +1,6 @@
 import { addStudent } from "../../database.js";
 
 export async function registerUser(req, res) {
-  console.log(req.body);
-
   const studentId = await addStudent(req.body);
 
   if (studentId === -1) {
