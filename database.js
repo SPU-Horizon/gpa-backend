@@ -38,3 +38,20 @@ export async function addStudent({first_name, last_name, email, avatar}) {
 
         return result.insertId;
 }
+
+export async function addEnrollments({student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, field_requirements, enrollments}) {
+    const [result] = await pool.query(`
+        UPDATE student
+        SET enrollment_year = ?, enrollment_quarter = ?, graduation_year = ?, graduation_quarter = ?
+        WHERE student_id = ?
+        `, [enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, student_id]);
+
+        for (enrollment of enrollments) {
+            await pool.query(`
+                INSERT INTO enrollment (student_id, course_id, year, quarter, grade)
+                VALUES (?, ?, ?, ?, ?)
+                `, [student_id, enrollment.course_id, enrollment.year, enrollment.quarter, enrollment.grade]);
+        }
+
+        return result.insertId;
+}
