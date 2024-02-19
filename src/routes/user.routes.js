@@ -1,7 +1,12 @@
 import express from 'express';
+import * as course from '../controllers/course.controller.js';
 
-export const router = express.Router();
+//export const router = express.Router();
 
-router.put('/register', (req, res) => { 
+/*
+router.get('/test', (req, res) => { 
     res.send('Registered');
 });
+*/
+
+//export default router;

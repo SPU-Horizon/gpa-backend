@@ -1,7 +1,14 @@
 import express from 'express';
+import * as course from '../controllers/course.controller.js';
 
-export const router = express.Router();
+const router = express.Router();
 
-router.get('/', (req, res) => { 
-    res.send('courses:.....');
-});
+//Course Routes
+router.get('/getCourses', course.getClasses);
+
+
+
+
+export default router;
+
+
