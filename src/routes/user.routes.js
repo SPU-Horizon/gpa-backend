@@ -1,9 +1,12 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import * as course from '../controllers/course.controller.js';
 
-router.put('/register', (req, res) => { 
+//export const router = express.Router();
+
+/*
+router.get('/test', (req, res) => { 
     res.send('Registered');
 });
+*/
 
-
-module.exports = router;
+//export default router;
