@@ -1,0 +1,145 @@
+{
+  "field_id": null,
+  "field_name": "Computer Science (BS)",
+  "field_year": "2020-21",
+  "field_credits": 108,
+  "field_UD_credits": 46,
+  "requirements": [
+    {
+      "section_title": "General Core: B.S. in Computer Science Degree",
+      "credits_required": 5,
+      "classes": [
+        "CSC 1230"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "General Core: B.S. in Computer Science Degree",
+      "credits_required": 5,
+      "classes": [
+        "CSC 3150"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "General Core: B.S. in Computer Science Degree",
+      "credits_required": 3,
+      "classes": [
+        "CSC 3221"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "General Core: B.S. in Computer Science Degree",
+      "credits_required": 3,
+      "classes": [
+        "CSC 3350"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "General Core: B.S. in Computer Science Degree",
+      "credits_required": 5,
+      "classes": [
+        "CSC 3760"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "General Core: B.S. in Computer Science Degree",
+      "credits_required": 15,
+      "classes": [
+        "MAT 1234",
+        "MAT 1235",
+        "MAT 1236"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "General Core: B.S. in Computer Science Degree",
+      "credits_required": 3,
+      "classes": [
+        "MAT 2401",
+        "MAT 3237"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "General Core: B.S. in Computer Science Degree",
+      "credits_required": 5,
+      "classes": [
+        "EE 1210"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "General Core: B.S. in Computer Science Degree",
+      "credits_required": 0,
+      "classes": [],
+      "comment": true
+    },
+    {
+      "section_title": "Select 15 Cr (minimum of 10 must be from same discipline)",
+      "credits_required": 15,
+      "classes": [
+        "BIO 2101",
+        "BIO 2102",
+        "BIO 2103",
+        "CHM 1211",
+        "CHM 1212",
+        "CHM 1213",
+        "CHM 2213",
+        "CHM 1330",
+        "PHY 1121",
+        "PHY 1122",
+        "PHY 1123"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "Select 15 Cr (minimum of 10 must be from same discipline)",
+      "credits_required": 0,
+      "classes": [],
+      "comment": true
+    },
+    {
+      "section_title": "Project & Internship",
+      "credits_required": 8,
+      "classes": [
+        "CSC 3000",
+        "CSC 4151",
+        "CSC 4152",
+        "CSC 4941"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "Project & Internship",
+      "credits_required": 0,
+      "classes": [],
+      "comment": true
+    },
+    {
+      "section_title": "Technical Electives: Select 3 courses (9 or more credits)",
+      "credits_required": 9,
+      "classes": [
+        "CSC 4210",
+        "CSC 4310",
+        "CSC 4350",
+        "CSC 4410",
+        "CSC 4430",
+        "CSC 4750",
+        "CSC 4760",
+        "CSC 4800",
+        "CSC UDEL"
+      ],
+      "comment": false
+    },
+    {
+      "section_title": "Technical Electives: Select 3 courses (9 or more credits)",
+      "credits_required": 0,
+      "classes": [],
+      "comment": true
+    }
+  ]
+}
