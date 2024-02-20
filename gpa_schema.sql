@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS course (
 course_id VARCHAR(10),
 name VARCHAR(72) NOT NULL,
 description TEXT,
-credits DECIMAL(2, 1),
+credits DECIMAL(2, 1) NOT NULL,
 attributes SET('UD', 'FLC', 'W', 'CUE', 'HON', 'WKA', 'WKH', 'WKQR', 'WKAS', 'WKFS', 'WKSS', 'WE'),
 standing SET('freshman', 'sophomore', 'junior', 'senior') NOT NULL,
 restrictions JSON,
