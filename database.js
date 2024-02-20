@@ -35,44 +35,16 @@ const currentQuarter = function() {
     };
 }
 
-// get all enrollments for a student
-// accepts email as parameter
-// returns an object with three properties: current, past, and gpa
-// current is an array of courses the student is currently enrolled in
-// past is an array of courses the student has completed
-// gpa is the student's 4.0 grade point average
-export async function getEnrollments(email) {
-    const [current] = await pool.query(`
-        SELECT enrollment.course_id AS course_id, name, description, credits, attributes
-        FROM student
-        INNER JOIN enrollment ON student.student_id = enrollment.student_id
-        INNER JOIN course ON enrollment.course_id = course.course_id
-        WHERE email = ? AND year = ${currentYear} AND quarter = "${currentQuarter}"
+// check if a user exists
+// accepts an email as parameter
+// returns a boolean indicating whether the user exists
+export async function userExists(email) {
+    const [rows] = await pool.query(`
+        SELECT * FROM student
+        WHERE email = ?
         `, [email]);
 
-    const [past]  = await pool.query(`
-        SELECT enrollment.course_id AS course_id, name, description, credits, attributes, year, quarter, grade
-        FROM student
-        INNER JOIN enrollment ON student.student_id = enrollment.student_id
-        INNER JOIN course ON enrollment.course_id = course.course_id
-        WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter}"))
-        `, [email]);
-    
-    let qualityPoints = 0;
-    let totalCredits = 0;
-
-    let credits;
-    let grade;
-    for (let course of past) {
-        credits = parseInt(course.credits);
-        grade = parseFloat(course.grade);
-        if (!isNaN(grade) && !isNaN(credits)) {
-            totalCredits += credits;
-            qualityPoints += grade * credits;
-        }
-    }
-
-    return {'current': current, 'past': past, 'gpa': qualityPoints / totalCredits};
+        return rows.length > 0;
 }
 
 // register a new user
@@ -87,16 +59,17 @@ export async function registerUser({first_name, last_name, email, avatar}) {
         return result.insertId;
 }
 
-// check if a user exists
+// get a user's information
 // accepts an email as parameter
-// returns a boolean indicating whether the user exists
-export async function userExists(email) {
-    const [rows] = await pool.query(`
-        SELECT * FROM student
+// returns an object with student_id, first_name, last_name, email, avatar, graduation_year, and graduation_quarter properties
+export async function getUser(email) {
+    const [[rows]] = await pool.query(`
+        SELECT student_id, first_name, last_name, email, avatar, graduation_year, graduation_quarter
+        FROM student
         WHERE email = ?
         `, [email]);
 
-        return rows.length > 0;
+        return rows;
 }
 
 // add enrollments for a student
@@ -170,15 +143,51 @@ export async function addEnrollments({student_id, enrollment_year, enrollment_qu
         return result.insertId;
 }
 
-// get user information
-// accepts an email as parameter
-// returns an object with student_id, first_name, last_name, email, avatar, graduation_year, and graduation_quarter properties
-export async function getUser(email) {
-    const [[rows]] = await pool.query(`
-        SELECT student_id, first_name, last_name, email, avatar, graduation_year, graduation_quarter
+// get all enrollments for a user
+// accepts email as parameter
+// returns an object with three properties: current, past, and gpa
+// current is an array of courses the student is currently enrolled in
+// past is an array of courses the student has completed
+// gpa is the student's 4.0 grade point average
+export async function getEnrollments(email) {
+    const [current] = await pool.query(`
+        SELECT enrollment.course_id AS course_id, name, description, credits, attributes
         FROM student
-        WHERE email = ?
+        INNER JOIN enrollment ON student.student_id = enrollment.student_id
+        INNER JOIN course ON enrollment.course_id = course.course_id
+        WHERE email = ? AND year = ${currentYear} AND quarter = "${currentQuarter}"
         `, [email]);
 
-        return rows;
+    const [past]  = await pool.query(`
+        SELECT enrollment.course_id AS course_id, name, description, credits, attributes, year, quarter, grade
+        FROM student
+        INNER JOIN enrollment ON student.student_id = enrollment.student_id
+        INNER JOIN course ON enrollment.course_id = course.course_id
+        WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter}"))
+        `, [email]);
+    
+    let qualityPoints = 0;
+    let totalCredits = 0;
+
+    let credits;
+    let grade;
+    for (let course of past) {
+        credits = parseInt(course.credits);
+        grade = parseFloat(course.grade);
+        if (!isNaN(grade) && !isNaN(credits)) {
+            totalCredits += credits;
+            qualityPoints += grade * credits;
+        }
+    }
+    const gpa = function() {
+        switch (totalCredits) {
+            case 0:
+                return null;
+            default:
+                return qualityPoints / totalCredits;
+        
+        }
+    }
+
+    return {'current': current, 'past': past, 'gpa': gpa()};
 }

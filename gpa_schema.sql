@@ -47,8 +47,8 @@ PRIMARY KEY (course_id)
 CREATE TABLE IF NOT EXISTS section (
 section_id SMALLINT UNSIGNED,
 course_id VARCHAR(10) NOT NULL,
-year YEAR NOT NULL,
-quarter ENUM('autumn', 'winter', 'spring', 'summer') NOT NULL,
+year YEAR,
+quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 topic TINYTEXT,
 classes JSON,
 location TINYTEXT,
