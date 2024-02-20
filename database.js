@@ -94,7 +94,7 @@ export async function addEnrollments({student_id, enrollment_year, enrollment_qu
         `, [enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, student_id]);
 
         for (enrollment of enrollments) {
-            if (enrollment.grade.isNaN()) {
+            if (isNaN(enrollment.grade)) {
                 switch (enrollment.grade) {
                     case 'A':
                         enrollment.grade = 4.0;
