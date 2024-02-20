@@ -19,8 +19,21 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME
 });
 
-currentYear = new Date().getFullYear();
-currentQuarter = Math.floor(new Date().getMonth() / 3) + 1;
+const currentYear = new Date().getFullYear();
+const currentQuarter = function() {
+    switch(Math.floor(new Date().getMonth() / 3) + 1) {
+        case 1:
+            return 'winter';
+        case 2:
+            return 'spring';
+        case 3:
+            return 'summer';
+        case 4:
+            return 'autumn';
+        default:
+            return null;
+    };
+}
 
 // get all enrollments for a student
 // accepts email as parameter
@@ -34,7 +47,7 @@ export async function getEnrollments(email) {
         FROM student
         INNER JOIN enrollment ON student.student_id = enrollment.student_id
         INNER JOIN course ON enrollment.course_id = course.course_id
-        WHERE email = ? AND year = ${currentYear} AND quarter = ${currentQuarter}
+        WHERE email = ? AND year = ${currentYear} AND quarter = "${currentQuarter}"
         `, [email]);
 
     const [past]  = await pool.query(`
@@ -42,16 +55,20 @@ export async function getEnrollments(email) {
         FROM student
         INNER JOIN enrollment ON student.student_id = enrollment.student_id
         INNER JOIN course ON enrollment.course_id = course.course_id
-        WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < ${currentQuarter}))
+        WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter}"))
         `, [email]);
     
     let qualityPoints = 0;
     let totalCredits = 0;
 
-    for (course of past) {
-        if (course.grade != null && course.credits != null) {
-            totalCredits += course.credits;
-            qualityPoints += course.grade * course.credits;
+    let credits;
+    let grade;
+    for (let course of past) {
+        credits = parseInt(course.credits);
+        grade = parseFloat(course.grade);
+        if (!isNaN(grade) && !isNaN(credits)) {
+            totalCredits += credits;
+            qualityPoints += grade * credits;
         }
     }
 
@@ -93,7 +110,7 @@ export async function addEnrollments({student_id, enrollment_year, enrollment_qu
         WHERE student_id = ?
         `, [enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, student_id]);
 
-        for (enrollment of enrollments) {
+        for (let enrollment of enrollments) {
             if (isNaN(enrollment.grade)) {
                 switch (enrollment.grade) {
                     case 'A':
