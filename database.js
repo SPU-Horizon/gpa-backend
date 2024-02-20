@@ -155,7 +155,7 @@ export async function getEnrollments(email) {
         FROM student
         INNER JOIN enrollment ON student.student_id = enrollment.student_id
         INNER JOIN course ON enrollment.course_id = course.course_id
-        WHERE email = ? AND year = ${currentYear} AND quarter = "${currentQuarter}"
+        WHERE email = ? AND year = ${currentYear} AND quarter = "${currentQuarter()}"
         `, [email]);
 
     const [past]  = await pool.query(`
@@ -163,7 +163,7 @@ export async function getEnrollments(email) {
         FROM student
         INNER JOIN enrollment ON student.student_id = enrollment.student_id
         INNER JOIN course ON enrollment.course_id = course.course_id
-        WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter}"))
+        WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
         `, [email]);
     
     let qualityPoints = 0;
