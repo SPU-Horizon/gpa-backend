@@ -6,14 +6,14 @@
 // and outputs all information in JSON form
 
 import fs from "fs";
-import cheerio from "cheerio";
+import { load } from "cheerio";
 
 export const courseParse = (input) => {
   //Read in degree check HTML
   const degCheck = fs.readFileSync(input, "utf8");
 
   //Load HTML
-  const $ = cheerio.load(degCheck);
+  const $ = load(degCheck);
 
   const output = {};
 
@@ -113,7 +113,7 @@ export const courseParse = (input) => {
 
   //Write to JSON object
   const json = JSON.stringify(output, null, 2);
-  return json;
+  return output;
 
   // console.log('HTML parsing complete.');
 };

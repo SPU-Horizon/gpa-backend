@@ -14,11 +14,12 @@ export async function getClasses(req, res) {
 export async function parseCourses(req, res) {
   // Access the file through req.file
   const file = req.file;
+  // console.log(file);
 
   // Handle the file as needed
   console.log("Received file:", file);
 
-  const parsedCourses = courseParse(file.path);
+  let parsedCourses = courseParse(file.path);
   // console.log(parsedCourses);
 
   try {
@@ -29,5 +30,9 @@ export async function parseCourses(req, res) {
   }
 
   // Respond to the client
-  res.send("File received successfully");
+  const response = {};
+  response.msg = "Courses parsed successfully";
+  response.data = parsedCourses;
+  res.status(200);
+  res.send(response);
 }
