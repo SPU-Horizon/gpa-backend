@@ -1,0 +1,487 @@
+{
+  "student_id": null,
+  "enrollment_year": "2020",
+  "enrollment_quarter": "Autumn",
+  "graduation_year": "2025",
+  "graduation_quarter": "Spring",
+  "field": [
+    [
+      "Computer Science"
+    ],
+    [
+      "Music",
+      "Data Analytics"
+    ]
+  ],
+  "classes_taken": [
+    {
+      "course_id": "CHM1310",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "CLA1300",
+      "year": "2024",
+      "quarter": "Winter",
+      "grade": "REG"
+    },
+    {
+      "course_id": "CSC2330",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "B"
+    },
+    {
+      "course_id": "CSC2431",
+      "year": "2021",
+      "quarter": "Spring",
+      "grade": "A"
+    },
+    {
+      "course_id": "CSC3000",
+      "year": "2022",
+      "quarter": "Autumn",
+      "grade": "C-"
+    },
+    {
+      "course_id": "CSC3150",
+      "year": "2022",
+      "quarter": "Spring",
+      "grade": "W"
+    },
+    {
+      "course_id": "CSC3150",
+      "year": "2023",
+      "quarter": "Spring",
+      "grade": "C+"
+    },
+    {
+      "course_id": "CSC3220",
+      "year": "2021",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "CSC3221",
+      "year": "2022",
+      "quarter": "Autumn",
+      "grade": "C-"
+    },
+    {
+      "course_id": "CSC3310",
+      "year": "2022",
+      "quarter": "Autumn",
+      "grade": "C"
+    },
+    {
+      "course_id": "CSC3350",
+      "year": "2023",
+      "quarter": "Spring",
+      "grade": "C"
+    },
+    {
+      "course_id": "CSC3430",
+      "year": "2023",
+      "quarter": "Winter",
+      "grade": "C"
+    },
+    {
+      "course_id": "CSC3750",
+      "year": "2023",
+      "quarter": "Winter",
+      "grade": "B+"
+    },
+    {
+      "course_id": "CSC3760",
+      "year": "2024",
+      "quarter": "Winter",
+      "grade": "REG"
+    },
+    {
+      "course_id": "CSC4151",
+      "year": "2023",
+      "quarter": "Autumn",
+      "grade": "N"
+    },
+    {
+      "course_id": "CSC4152",
+      "year": "2024",
+      "quarter": "Winter",
+      "grade": "REG"
+    },
+    {
+      "course_id": "CSC4410",
+      "year": "2023",
+      "quarter": "Autumn",
+      "grade": "B"
+    },
+    {
+      "course_id": "EE1210",
+      "year": "2021",
+      "quarter": "Autumn",
+      "grade": "A"
+    },
+    {
+      "course_id": "ENG2223",
+      "year": "2021",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "ENG3380",
+      "year": "2022",
+      "quarter": "Spring",
+      "grade": "A-"
+    },
+    {
+      "course_id": "FRE1101",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "FRE1102",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "3.6"
+    },
+    {
+      "course_id": "MAT1234",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "MAT1235",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "MAT1236",
+      "year": "2021",
+      "quarter": "Spring",
+      "grade": "B-"
+    },
+    {
+      "course_id": "MAT1720",
+      "year": "2022",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "MAT2360",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "A"
+    },
+    {
+      "course_id": "MAT2401",
+      "year": "2021",
+      "quarter": "Winter",
+      "grade": "B"
+    },
+    {
+      "course_id": "MAT3380",
+      "year": "2023",
+      "quarter": "Winter",
+      "grade": "A-"
+    },
+    {
+      "course_id": "MATLDEL",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "MUS1110",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "3.9"
+    },
+    {
+      "course_id": "MUS1111",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "MUS1113",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "3.9"
+    },
+    {
+      "course_id": "MUS1114",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "MUS1250",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "MUS1250",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "MUS1250",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "MUS1260",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "MUS1800",
+      "year": "2022",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS2304",
+      "year": "2021",
+      "quarter": "Autumn",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS2313",
+      "year": "2021",
+      "quarter": "Autumn",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS2350",
+      "year": "2021",
+      "quarter": "Autumn",
+      "grade": "A-"
+    },
+    {
+      "course_id": "MUS2570",
+      "year": "2022",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4240",
+      "year": "2022",
+      "quarter": "Spring",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4304",
+      "year": "2022",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4304",
+      "year": "2022",
+      "quarter": "Spring",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4304",
+      "year": "2022",
+      "quarter": "Autumn",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4304",
+      "year": "2023",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4304",
+      "year": "2023",
+      "quarter": "Spring",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4304",
+      "year": "2023",
+      "quarter": "Autumn",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4313",
+      "year": "2022",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4313",
+      "year": "2022",
+      "quarter": "Spring",
+      "grade": "W"
+    },
+    {
+      "course_id": "MUS4350",
+      "year": "2022",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4350",
+      "year": "2022",
+      "quarter": "Spring",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4350",
+      "year": "2022",
+      "quarter": "Autumn",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4350",
+      "year": "2023",
+      "quarter": "Winter",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4350",
+      "year": "2023",
+      "quarter": "Spring",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4350",
+      "year": "2023",
+      "quarter": "Autumn",
+      "grade": "A"
+    },
+    {
+      "course_id": "MUS4350",
+      "year": "2024",
+      "quarter": "Winter",
+      "grade": "REG"
+    },
+    {
+      "course_id": "MUS4360",
+      "year": "2024",
+      "quarter": "Winter",
+      "grade": "REG"
+    },
+    {
+      "course_id": "MUSLDEL",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "3.8"
+    },
+    {
+      "course_id": "PHY1121",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "PHY1122",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "PHY1135",
+      "year": "2021",
+      "quarter": "Summer",
+      "grade": "A"
+    },
+    {
+      "course_id": "SOC1110",
+      "year": "2023",
+      "quarter": "Autumn",
+      "grade": "A-"
+    },
+    {
+      "course_id": "SPGELWKA",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "SPGELWKA",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "SPGELWKAS",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "SPULDEL",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "4.0"
+    },
+    {
+      "course_id": "SPULDEL",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "3.8"
+    },
+    {
+      "course_id": "UCOL1000",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "P"
+    },
+    {
+      "course_id": "UCOR2000",
+      "year": "2021",
+      "quarter": "Autumn",
+      "grade": "A-"
+    },
+    {
+      "course_id": "UCOR3000",
+      "year": "2022",
+      "quarter": "Autumn",
+      "grade": "A-"
+    },
+    {
+      "course_id": "UFDN1000",
+      "year": "2020",
+      "quarter": "Autumn",
+      "grade": "A"
+    },
+    {
+      "course_id": "UFDN2000",
+      "year": "2021",
+      "quarter": "Autumn",
+      "grade": "A-"
+    },
+    {
+      "course_id": "UFDN3100",
+      "year": "2023",
+      "quarter": "Spring",
+      "grade": "A-"
+    },
+    {
+      "course_id": "WRI1000",
+      "year": "2021",
+      "quarter": "Winter",
+      "grade": "B"
+    },
+    {
+      "course_id": "WRI1100",
+      "year": "2021",
+      "quarter": "Spring",
+      "grade": "B"
+    },
+    {}
+  ]
+}
