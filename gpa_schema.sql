@@ -67,5 +67,3 @@ PRIMARY KEY (student_id, course_id, year, quarter),
 FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-INSERT INTO field (field_id, name) VALUE (0, 'CUSTOM');
