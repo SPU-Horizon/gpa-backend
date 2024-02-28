@@ -27,11 +27,11 @@ Set the root password of the MySQL Community server as `QzbPjm34@WtV*yHNBDBy@MJM
 > [!NOTE]
 > If you need to reset your MySQL server root password:
 > 1. Open MySQL WorkBench and connect to the MySQL localhost instance.
-> 2. Click "Administration" in the left pane.
-> 3. Click "Users and Privileges".
+> 2. Select "Administration" in the left pane.
+> 3. Select "Users and Privileges".
 > 4. Select "root" under "User Accounts".
 > 5. Copy `QzbPjm34@WtV*yHNBDBy@MJMxNZ8CK_q` and paste into the "Password" and "Confirm Password" fields.
-> 6. Click "Apply".
+> 6. Select "Apply".
 
 > [!WARNING]
 > The MySQL server will continue running in the background until stopped.
@@ -48,8 +48,10 @@ Set the root password of the MySQL Community server as `QzbPjm34@WtV*yHNBDBy@MJM
 5. In the *gpa-backend* directory, run the following terminal commands:
    - `npm ci`
 6. Open MySQL WorkBench and connect to the MySQL localhost instance.
-7. Click "Open SQL Script" and select `gpa_schema.sql` from *.../GPA/gpa-backend*.
-8. Click "Run SQL Script".
+7. Select "Open SQL Script" and select `gpa_schema.sql` from *.../GPA/gpa-backend*.
+8. Select "Run SQL Script".
+9. Select "Open SQL Script" and select `gpa_data.sql` from *.../GPA/gpa-backend*.
+10. Select "Run SQL Script".
 
 ## Run the Application
 
