@@ -88,7 +88,7 @@ export const courseParse = (input) => {
                   break;
                 case 1: //grab the course number, put it and the subject into course_id
                   let courseNum = $(el).text().trim();
-                  classData[`course_id`] = subject + courseNum;
+                  classData[`course_id`] = subject + " " + courseNum;
                   break;
                 case 4: //split the term taken into quarter and year, add to JSON
                   let term = $(el).text().trim();
@@ -111,8 +111,6 @@ export const courseParse = (input) => {
   // //Write JSON data to file
   // fs.writeFileSync('output.json', JSON.stringify(output, null, 2))
 
-  //Write to JSON object
-  const json = JSON.stringify(output, null, 2);
   return output;
 
   // console.log('HTML parsing complete.');

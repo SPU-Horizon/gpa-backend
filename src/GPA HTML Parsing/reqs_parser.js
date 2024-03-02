@@ -5,7 +5,7 @@
 import fs from "fs";
 import cheerio from "cheerio";
 
-export const reqsParse = (input) => {
+export const reqsParser = (input) => {
   //Read in degree check HTML
   const degCheck = fs.readFileSync(input, "utf8");
 
@@ -18,13 +18,13 @@ export const reqsParse = (input) => {
   output[`field_id`] = null;
 
   //Parse field information
-  const field = $("div.heading").text();
+  let field = $("div.heading").text();
   output[`field_name`] = field.slice(0, field.lastIndexOf("Catalog") - 9); // Name
   output[`field_year`] = field.slice(
     field.lastIndexOf("Catalog") - 8,
     field.indexOf("Catalog") - 1
   ); // Catalog year
-  field_credits = $("div.heading").find("i").text().split(" ");
+  let field_credits = $("div.heading").find("i").text().split(" ");
   output[`field_credits`] = Number(field_credits[0].slice(1)); // Total credits required
   output[`field_UD_credits`] = Number(field_credits[3]); // Upper Division credits required
 
@@ -42,7 +42,10 @@ export const reqsParse = (input) => {
   $("table.degReqTBL:first")
     .find("tr")
     .each((index, element) => {
-      titleRow = $(element).find('b[style="font-size:16px;"]').text().trim(); // Checks for section title formatting
+      let titleRow = $(element)
+        .find('b[style="font-size:16px;"]')
+        .text()
+        .trim(); // Checks for section title formatting
       if (titleRow != "") {
         // If section title found:
         if (req[`section_title`] != "") {
@@ -93,11 +96,9 @@ export const reqsParse = (input) => {
   // //Write JSON data to file
   // fs.writeFileSync('reqs.json', JSON.stringify(output, null, 2))
 
-  //Write to JSON object
-  const json = JSON.stringify(output, null, 2);
-  return json;
+  return output;
 
   // console.log('HTML parsing complete.');
 };
 
-export default reqsParse;
+export default reqsParser;
