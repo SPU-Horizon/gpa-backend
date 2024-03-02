@@ -11,3 +11,14 @@ export async function registerUser(req, res) {
     res.status(201).json({ studentId });
   }
 }
+
+export async function getInfo(req, res) {
+  const studentId = req.query.studentId;
+  //const studentInfo = await getStudentInfo(studentId);
+
+  if (studentInfo === -1) {
+    res.status(500).json({ message: "An error occurred while getting the student's info." });
+  } else {
+    res.status(200).json({ studentInfo });
+  }
+}
