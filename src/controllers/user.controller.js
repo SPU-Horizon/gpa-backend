@@ -1,4 +1,4 @@
-import { addStudent } from "../../database.js";
+import { addStudent, getUser } from "../../database.js";
 
 export async function registerUser(req, res) {
   const studentId = await addStudent(req.body);
@@ -13,12 +13,7 @@ export async function registerUser(req, res) {
 }
 
 export async function getInfo(req, res) {
-  const studentId = req.query.studentId;
-  //const studentInfo = await getStudentInfo(studentId);
-
-  if (studentInfo === -1) {
-    res.status(500).json({ message: "An error occurred while getting the student's info." });
-  } else {
-    res.status(200).json({ studentInfo });
-  }
+  const studentInfo = await getUser(req.query.email);
+  res.send(studentInfo);
+  return;
 }
