@@ -19,14 +19,19 @@ export const reqsParse = (input) => {
 
   //Parse field information
   const field = $("div.heading").text();
-  output[`field_name`] = field.slice(0, field.lastIndexOf("Catalog") - 9); // Name
-  output[`field_year`] = field.slice(
-    field.lastIndexOf("Catalog") - 8,
-    field.indexOf("Catalog") - 1
-  ); // Catalog year
+  const fName = field.slice(0, field.lastIndexOf("Catalog") - 9); // Name
+  output[`field_name`] = fName;
+  if (fName.includes("Minor")) {
+    output[`field_type`] = "Minor";
+  } else if (fName.includes("BA") || fName.includes("BS") || fName.includes("Major") || fName.includes("Certificate")) {
+    output[`field_type`] = "Major";
+  } else {
+    output[`field_type`] = "Program";
+  }
+  output[`year`] = field.slice(field.lastIndexOf("Catalog") - 8,field.indexOf("Catalog") - 1); // Catalog year
   field_credits = $("div.heading").find("i").text().split(" ");
-  output[`field_credits`] = Number(field_credits[0].slice(1)); // Total credits required
-  output[`field_UD_credits`] = Number(field_credits[3]); // Upper Division credits required
+  output[`credits`] = Number(field_credits[0].slice(1)); // Total credits required
+  output[`UD_credits`] = Number(field_credits[3]); // Upper Division credits required
 
   //Parse field requirements
 

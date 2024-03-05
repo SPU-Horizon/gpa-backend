@@ -84,7 +84,7 @@ export const courseParse = (input) => {
   output[`field`] = [majorList, minorList];
 
   //Extract table
-  const classesTaken = [];
+  const enrollments = [];
   var subject = "";
 
   $("table.dhckDataWB:first").each((index, element) => {
@@ -117,13 +117,13 @@ export const courseParse = (input) => {
                   classData[`grade`] = $(el).text().trim();
               }
             });
-          classesTaken.push(classData);
+          enrollments.push(classData);
         }
       });
   });
 
   //Put classes taken into output
-  output[`classes_taken`] = classesTaken;
+  output[`classes_taken`] = enrollments;
   // //TEST OUTPUT
   // console.log(output);
 
