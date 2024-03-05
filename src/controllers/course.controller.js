@@ -1,6 +1,6 @@
 import { getEnrollments, addEnrollments } from "../../database.js";
 import courseParse from "../GPA HTML Parsing/course_parser.js";
-import reqsParser from "../GPA HTML Parsing/reqs_parser.js";
+import reqsParse from "../GPA HTML Parsing/reqs_parser.js";
 import fs from "fs/promises";
 
 //This will get all classes a student has taken, what year/quarter it was taken, and what grade was recieved
@@ -20,7 +20,7 @@ export async function parseAndUpload(req, res) {
   console.log("Received file:", file);
 
   let parsedCourses = courseParse(file.path);
-  let parsedRequirements = reqsParser(file.path);
+  let parsedRequirements = reqsParse(file.path);
 
   /* -------- TESTING -------- */
   /* 
