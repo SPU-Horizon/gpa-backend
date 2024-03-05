@@ -123,7 +123,7 @@ export const courseParse = (input) => {
   });
 
   //Put classes taken into output
-  output[`classes_taken`] = enrollments;
+  output[`enrollments`] = enrollments;
   // //TEST OUTPUT
   // console.log(output);
 
