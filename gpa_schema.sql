@@ -4,18 +4,28 @@ CREATE SCHEMA IF NOT EXISTS gpa;
 
 USE gpa;
 
+CREATE TABLE IF NOT EXISTS counselor (
+counselor_id TINYINT UNSIGNED AUTO_INCREMENT,
+full_name VARCHAR(70) NOT NULL,
+email VARCHAR(254) NOT NULL,
+phone VARCHAR(15) NOT NULL,
+PRIMARY KEY(counselor_id)
+);
+
 CREATE TABLE IF NOT EXISTS student (
 student_id SMALLINT UNSIGNED AUTO_INCREMENT,
 first_name VARCHAR(35) NOT NULL,
 last_name VARCHAR(35) NOT NULL,
 email VARCHAR(254) NOT NULL UNIQUE,
 avatar TEXT,
+counselor_id TINYINT UNSIGNED,
 enrollment_year YEAR,
 enrollment_quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 graduation_year YEAR,
 graduation_quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 field_requirements JSON,
-PRIMARY KEY (student_id)
+PRIMARY KEY (student_id),
+FOREIGN KEY (counselor_id) REFERENCES counselor (counselor_id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS field (
@@ -27,7 +37,7 @@ PRIMARY KEY (field_id)
 );
 
 CREATE TABLE IF NOT EXISTS course (
-course_id VARCHAR(10),
+course_id VARCHAR(15),
 name VARCHAR(72) NOT NULL,
 description TEXT,
 credits DECIMAL(2, 1) NOT NULL,
@@ -46,7 +56,7 @@ PRIMARY KEY (course_id)
 
 CREATE TABLE IF NOT EXISTS section (
 section_id SMALLINT UNSIGNED,
-course_id VARCHAR(10) NOT NULL,
+course_id VARCHAR(15) NOT NULL,
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 topic TINYTEXT,
@@ -59,7 +69,7 @@ FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE CASCADE ON UPDAT
 
 CREATE TABLE IF NOT EXISTS enrollment (
 student_id SMALLINT UNSIGNED,
-course_id VARCHAR(10),
+course_id VARCHAR(15),
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 grade DECIMAL(2, 1),
@@ -67,5 +77,3 @@ PRIMARY KEY (student_id, course_id, year, quarter),
 FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-INSERT INTO field (field_id, name) VALUE (0, 'CUSTOM');
