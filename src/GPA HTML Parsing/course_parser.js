@@ -106,7 +106,7 @@ export const courseParse = (input) => {
   });
 
   //Put classes taken into output
-  output[`classes_taken`] = classesTaken;
+  output[`enrollments`] = classesTaken;
 
   // //Write JSON data to file
   // fs.writeFileSync('output.json', JSON.stringify(output, null, 2))
