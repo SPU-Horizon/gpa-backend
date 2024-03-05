@@ -89,6 +89,8 @@ export const reqsParse = (input) => {
 
   //Put requirements data into output
   output[`requirements`] = reqs;
+  // //TEST OUTPUT
+  // console.log(output);
 
   // //Write JSON data to file
   // fs.writeFileSync('reqs.json', JSON.stringify(output, null, 2))

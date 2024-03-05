@@ -1,4 +1,4 @@
-import { addStudent } from "../../database.js";
+import { registerUser as addStudent } from "../../database.js";
 
 export async function registerUser(req, res) {
   const studentId = await addStudent(req.body);
