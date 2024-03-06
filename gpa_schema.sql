@@ -28,21 +28,13 @@ PRIMARY KEY (student_id),
 FOREIGN KEY (counselor_id) REFERENCES counselor (counselor_id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS field (
-field_id TINYINT UNSIGNED AUTO_INCREMENT,
-name VARCHAR(72) NOT NULL UNIQUE,
-type ENUM('major', 'minor', 'program'),
-credits TINYINT UNSIGNED,
-PRIMARY KEY (field_id)
-);
-
 CREATE TABLE IF NOT EXISTS course (
 course_id VARCHAR(15),
 name VARCHAR(72) NOT NULL,
 description TEXT,
-credits DECIMAL(2, 1) NOT NULL,
+credits DECIMAL(2, 1),
 attributes SET('UD', 'FLC', 'W', 'CUE', 'HON', 'WKA', 'WKH', 'WKQR', 'WKAS', 'WKFS', 'WKSS', 'WE'),
-standing SET('freshman', 'sophomore', 'junior', 'senior') NOT NULL,
+standing SET('freshman', 'sophomore', 'junior', 'senior'),
 restrictions JSON,
 prerequisites JSON,
 corequisites JSON,
