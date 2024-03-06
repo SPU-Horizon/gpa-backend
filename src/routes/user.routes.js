@@ -1,8 +1,12 @@
 import express from "express";
-import { registerUser } from "../controllers/user.controller.js";
+import {
+  registerUserFunction,
+  uploadProfilePhoto,
+} from "../controllers/user.controller.js";
 
 export const userRouter = express.Router();
 
-userRouter.post("/register", registerUser);
+userRouter.post("/register", registerUserFunction);
+userRouter.post("/upload-profile-photo", uploadProfilePhoto);
 
 export default userRouter;
