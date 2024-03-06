@@ -30,7 +30,8 @@ export async function parseAndUpload(req, res) {
   */
 
   // Currently, we need to pass in a student_id, graduation_year, and graduation_quarter that are not being parsed correctly
-
+  parsedCourses.student_id = 1;
+  
   try {
     await fs.unlink(file.path);
     console.log("File removed successfully.");

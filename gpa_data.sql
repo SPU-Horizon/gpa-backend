@@ -8,13 +8,13 @@ INSERT INTO counselor (full_name, email, phone) VALUES
 ("Marisa Vogel", "mvogel@spu.edu", "206-281-2840");
 
 INSERT INTO course VALUES
-("SPGE LWKA","Ways of Knowing in the Arts",NULL,NULL,('WKA'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-("SPGE LWKH","Ways of Knowing in the Humanities",NULL,NULL,('WKH'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-("SPGE LWKQR","Ways of Knowing in Quantitative Reasoning",NULL,NULL,('WKQR'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-("SPGE LWKS","Ways of Knowing in the Sciences",NULL,NULL,('WKS'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-("SPGE LWKSS","Ways of Knowing in the Social Sciences",NULL,NULL,('WKSS'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-("SPGE LWE","Ways of Engaging",NULL,NULL,('WE'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-("SPGE LCUE","Cultural Understanding and Engagement",NULL,NULL,('CUE'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+("SPGE LWKA","Ways of Knowing in the Arts",NULL,NULL,"WKA",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+("SPGE LWKH","Ways of Knowing in the Humanities",NULL,NULL,"WKH",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+("SPGE LWKQR","Ways of Knowing in Quantitative Reasoning",NULL,NULL,"WKQR",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+("SPGE LWKS","Ways of Knowing in the Sciences",NULL,NULL,"WKFS",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+("SPGE LWKSS","Ways of Knowing in the Social Sciences",NULL,NULL,"WKSS",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+("SPGE LWE","Ways of Engaging",NULL,NULL,"WE",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+("SPGE LCUE","Cultural Understanding and Engagement",NULL,NULL,"CUE",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 ("ACCT 2361","Financial Accounting","Makes clear the ways in which accounting is an information development and communication function that supports economic decision making, and prepares students for subsequent learning. Not recommended for first-quarter freshmen.",5.0,"","freshman","{}","{}","{}",0,NULL,NULL,NULL,NULL),
 ("ACCT 2362","Managerial Accounting","Develops basic concepts and skills for preparing accounting information for managerial decision-making purposes. Computer spreadsheet skills are required. Typically offered: Autumn, Winter, Spring.",5.0,"","freshman","{}","{}","{}",0,NULL,NULL,NULL,NULL),
 ("ACCT 3324","Federal Income Taxation","Provides an introduction to the income tax structure and basic concepts of tax law relating to individual, corporate, partnership, and estate income taxation. Emphasizes a practical application of tax law enabling the student to understand and apply the concepts of income, exemptions, and deductions.",5.0,"","freshman","{}","{}","{}",0,NULL,NULL,NULL,NULL),
