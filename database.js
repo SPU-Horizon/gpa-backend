@@ -13,10 +13,10 @@ dotenv.config(); // Load environment variables from a .env file into process.env
 
 // Create a connection pool
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
 });
 
 const currentYear = new Date().getFullYear();
@@ -44,7 +44,7 @@ export async function userExists(email) {
         WHERE email = ?
         `, [email]);
 
-        return rows.length > 0;
+    return rows.length > 0;
 }
 
 // register a new user
@@ -56,20 +56,29 @@ export async function registerUser({first_name, last_name, email, avatar}) {
         VALUES (?, ?, ?, ?)
         `, [first_name, last_name, email, avatar]);
 
-        return result.insertId;
+    return result.insertId;
 }
 
 // get a user's information
 // accepts an email as parameter
 // returns an object with student_id, first_name, last_name, email, avatar, graduation_year, and graduation_quarter properties
 export async function getUser(email) {
-    const [[rows]] = await pool.query(`
-        SELECT student_id, first_name, last_name, email, avatar, graduation_year, graduation_quarter
+    const [[user]] = await pool.query(`
+        SELECT student_id, first_name, last_name, avatar, graduation_year, graduation_quarter, field_requirements
         FROM student
         WHERE email = ?
         `, [email]);
 
-        return rows;
+    const [[first_field]] = await pool.query(`
+        SELECT name
+        FROM field
+        WHERE field_id = ?
+        `, user.field_requirements[0].field_id);
+        
+    delete user.field_requirements;
+    user.first_field = first_field.name;
+
+    return user;
 }
 
 // add enrollments for a student
@@ -83,64 +92,64 @@ export async function addEnrollments({student_id, enrollment_year, enrollment_qu
         WHERE student_id = ?
         `, [enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, student_id]);
 
-        for (let enrollment of enrollments) {
-            if (isNaN(enrollment.grade)) {
-                switch (enrollment.grade) {
-                    case 'A':
-                        enrollment.grade = 4.0;
-                        break;
-                    case 'A-':
-                        enrollment.grade = 3.7;
-                        break;
-                    case 'B+':
-                        enrollment.grade = 3.3;
-                        break;
-                    case 'B':
-                        enrollment.grade = 3.0;
-                        break;
-                    case 'B-':
-                        enrollment.grade = 2.7;
-                        break;
-                    case 'C+':
-                        enrollment.grade = 2.3;
-                        break;
-                    case 'C':
-                        enrollment.grade = 2.0;
-                        break;
-                    case 'C-':
-                        enrollment.grade = 1.7;
-                        break;
-                    case 'D+':
-                        enrollment.grade = 1.3;
-                        break;
-                    case 'D':
-                        enrollment.grade = 1.0;
-                        break;
-                    case 'E':
-                        enrollment.grade = 0.0;
-                        break;
-                    case 'P':
-                        enrollment.grade = 0.0;
-                        break;
-                    case 'NC':
-                        enrollment.grade = 0.0;
-                        break;
-                    case 'AU':
-                        enrollment.grade = 0.0;
-                        break;
-                    default:
-                        enrollment.grade = null;
-                        break;
-                }
+    for (let enrollment of enrollments) {
+        if (isNaN(enrollment.grade)) {
+            switch (enrollment.grade) {
+                case 'A':
+                    enrollment.grade = 4.0;
+                    break;
+                case 'A-':
+                    enrollment.grade = 3.7;
+                    break;
+                case 'B+':
+                    enrollment.grade = 3.3;
+                    break;
+                case 'B':
+                    enrollment.grade = 3.0;
+                    break;
+                case 'B-':
+                    enrollment.grade = 2.7;
+                    break;
+                case 'C+':
+                    enrollment.grade = 2.3;
+                    break;
+                case 'C':
+                    enrollment.grade = 2.0;
+                    break;
+                case 'C-':
+                    enrollment.grade = 1.7;
+                    break;
+                case 'D+':
+                    enrollment.grade = 1.3;
+                    break;
+                case 'D':
+                    enrollment.grade = 1.0;
+                    break;
+                case 'E':
+                    enrollment.grade = 0.0;
+                    break;
+                case 'P':
+                    enrollment.grade = 0.0;
+                    break;
+                case 'NC':
+                    enrollment.grade = 0.0;
+                    break;
+                case 'AU':
+                    enrollment.grade = 0.0;
+                    break;
+                default:
+                    enrollment.grade = null;
+                    break;
             }
-            
-            await pool.query(`
-                INSERT INTO enrollment (student_id, course_id, year, quarter, grade)
-                VALUES (?, ?, ?, ?, ?)
-                `, [student_id, enrollment.course_id, enrollment.year, enrollment.quarter, enrollment.grade]);
         }
+            
+        await pool.query(`
+            INSERT INTO enrollment (student_id, course_id, year, quarter, grade)
+            VALUES (?, ?, ?, ?, ?)
+            `, [student_id, enrollment.course_id, enrollment.year, enrollment.quarter, enrollment.grade]);
+    }
 
-        return result.insertId;
+    return result.insertId;
 }
 
 // get all enrollments for a user
@@ -185,7 +194,6 @@ export async function getEnrollments(email) {
                 return null;
             default:
                 return qualityPoints / totalCredits;
-        
         }
     }
 

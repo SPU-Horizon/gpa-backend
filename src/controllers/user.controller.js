@@ -1,5 +1,6 @@
 import { registerUser, getUser } from "../../database.js";
 
+
 export async function registerUserFunction(req, res) {
   const studentId = await registerUser(req.body);
 

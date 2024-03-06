@@ -30,9 +30,9 @@ export const courseParse = (input) => {
   output[`enrollment_quarter`] = admitQuarterYear[0];
 
   //Note: parse slightly differently if graduation not yet applied for
-  let gradIndex = genInfo.indexOf("Graduation");
+  let gradIndex = genInfo.indexOf("Graduate");
   let gradTerm = genInfo.slice(gradIndex + 12, gradIndex + 23);
-  if (gradTerm.includes("You")) {
+  if (genInfo.slice(gradIndex - 16, gradIndex).includes("not")) {
     //"You have not applied to Graduate."
     gradIndex = genInfo.lastIndexOf("Graduation"); //Get anticipated graduation date
     gradTerm = genInfo.slice(gradIndex + 19, gradIndex + 30);
@@ -40,6 +40,21 @@ export const courseParse = (input) => {
   const gradQuarterYear = gradTerm.split(" ");
   output[`graduation_year`] = gradQuarterYear[1];
   output[`graduation_quarter`] = gradQuarterYear[0];
+
+  //Get advisors
+  const advisorText = $('b:contains("Advisors:")').parent().text();
+  const advisorList = advisorText.slice(advisorText.indexOf("Advisors:") + 9, advisorText.indexOf("(Change Your Advisors)")).split(",");
+  for(let i = 0; i < advisorList.length; i++) {
+    let advisor = advisorList[i];
+    if (advisor.includes("(")) {
+      advisor = advisor.split("(");
+      output[advisor[1].slice(0, advisor[1].indexOf(")"))] = advisor[0].trim();
+      advisor = advisor[0];
+    }
+    advisor = advisor.trim();
+    advisorList[i] = advisor;
+  }
+  output[`advisors`] = advisorList;
 
   //Get majors/minors
   const majorList = [];
@@ -69,7 +84,7 @@ export const courseParse = (input) => {
   output[`field`] = [majorList, minorList];
 
   //Extract table
-  const classesTaken = [];
+  const enrollments = [];
   var subject = "";
 
   $("table.dhckDataWB:first").each((index, element) => {
@@ -90,6 +105,8 @@ export const courseParse = (input) => {
                   let courseNum = $(el).text().trim();
                   classData[`course_id`] = subject + courseNum;
                   break;
+                case 2: //grab the course credits
+                  classData[`credits`] = $(el).text().trim();
                 case 4: //split the term taken into quarter and year, add to JSON
                   let term = $(el).text().trim();
                   const classQuarterYear = term.split(" ");
@@ -100,13 +117,15 @@ export const courseParse = (input) => {
                   classData[`grade`] = $(el).text().trim();
               }
             });
-          classesTaken.push(classData);
+          enrollments.push(classData);
         }
       });
   });
 
   //Put classes taken into output
-  output[`classes_taken`] = classesTaken;
+  output[`enrollments`] = enrollments;
+  // //TEST OUTPUT
+  // console.log(output);
 
   // //Write JSON data to file
   // fs.writeFileSync('output.json', JSON.stringify(output, null, 2))
