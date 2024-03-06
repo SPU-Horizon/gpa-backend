@@ -32,9 +32,9 @@ export async function parseAndUpload(req, res) {
   try {
     await addEnrollments(parsedCourses);
   } catch (error) {
-    let response = {};
-    response.msg = "Error adding enrollments";
-    res.status(500);
+    return res.status(500).send({
+      error: "There was an issue uploading your data to the database.",
+    });
   }
 
   // Respond to the client
