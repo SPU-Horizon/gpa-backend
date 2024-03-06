@@ -9,6 +9,6 @@ router.get("/getCourses", course.getClasses);
 
 // Parse Course Routes
 // Parser currently needs fixing --- will remove comment once fixed
-router.post("/parseCourses", upload.single("file"), course.parseCourses);
+router.post("/parseCourses", upload.single("file"), course.parseAndUpload);
 
 export default router;

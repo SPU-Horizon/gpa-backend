@@ -103,7 +103,7 @@ export const courseParse = (input) => {
                   break;
                 case 1: //grab the course number, put it and the subject into course_id
                   let courseNum = $(el).text().trim();
-                  classData[`course_id`] = subject + courseNum;
+                  classData[`course_id`] = subject + " " + courseNum;
                   break;
                 case 2: //grab the course credits
                   classData[`credits`] = $(el).text().trim();

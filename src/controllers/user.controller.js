@@ -1,6 +1,5 @@
 import { registerUser, getUser } from "../../database.js";
 
-
 export async function registerUserFunction(req, res) {
   const studentId = await registerUser(req.body);
 
@@ -30,14 +29,8 @@ export async function uploadProfilePhoto(req, res) {
   res.status(200).json({ message: "Profile photo uploaded successfully." });
 }
 
-
-
 export async function getInfo(req, res) {
   const studentInfo = await getUser(req.query.email);
   res.send(studentInfo);
   return;
 }
-
-
-
-

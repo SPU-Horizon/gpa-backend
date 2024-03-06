@@ -69,14 +69,19 @@ export async function getUser(email) {
         WHERE email = ?
         `, [email]);
 
-    const [[first_field]] = await pool.query(`
-        SELECT name
-        FROM field
-        WHERE field_id = ?
-        `, user.field_requirements[0].field_id);
-        
+    let fields = [];
+
+    for (let field of user.field_requirements) {
+        fields.push(
+            {
+                name: field.field_name,
+                type: field.field_type,
+            }
+        );
+    }
+    
     delete user.field_requirements;
-    user.first_field = first_field.name;
+    user.fields = fields;
 
     return user;
 }
@@ -197,5 +202,63 @@ export async function getEnrollments(email) {
         }
     }
 
-    return {'current': current, 'past': past, 'gpa': gpa()};
+    return {current: current, past: past, gpa: gpa()};
+}
+
+export async function addFieldRequirements(student_id, field_requirements) {
+}
+
+export async function getRequiredClasses(student_id) {
+    const [past_enrollments]  = await pool.query(`
+        SELECT course_id
+        FROM enrollment
+        WHERE student_id = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}")) AND grade >= 2.0
+        `, [student_id]);
+
+    past_enrollments.map(enrollment => enrollment.course_id);
+
+    const [field_requirements] = await pool.query(`
+        SELECT field_requirements
+        FROM student
+        WHERE student_id = ?
+        `, [student_id]);
+    
+    let required_classes = new Set();
+
+    for (let field of field_requirements) {
+        for (let section of field.requirements) {
+            for (let course of section.classes) {
+                required_classes.add(course);
+            }
+        }
+    }
+
+    [courses_detail] = await pool.query(`
+    SELECT course_id, name, credits, attributes, standing, restrictions, prerequisites, corequisites, approval_required, last_offered, recurrence_year, recurrence_quarter, recurrence_classes
+    FROM course
+    WHERE course_id IN ?
+    `, [required_classes]);
+
+    let course_detail = new Map();
+
+    courses_detail.map(course => {
+        course_detail.set(course.course_id, course);
+    });
+    
+    for (let field of field_requirements) {
+        for (let section of field.requirements) {
+            for (let course of section.classes) {
+                course = course_detail.get(course);
+
+                if (past_enrollments.includes(course.course_id)) {
+                    course.completed = true;
+                }
+                else {
+                    course.completed = false;
+                }
+            }
+        }
+    }
+
+    return {field_requirements: field_requirements, past_enrollments: past_enrollments};
 }

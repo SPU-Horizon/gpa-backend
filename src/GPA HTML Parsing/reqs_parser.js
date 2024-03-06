@@ -29,7 +29,7 @@ export const reqsParse = (input) => {
     output[`field_type`] = "Program";
   }
   output[`year`] = field.slice(field.lastIndexOf("Catalog") - 8,field.indexOf("Catalog") - 1); // Catalog year
-  field_credits = $("div.heading").find("i").text().split(" ");
+  let field_credits = $("div.heading").find("i").text().split(" ");
   output[`credits`] = Number(field_credits[0].slice(1)); // Total credits required
   output[`UD_credits`] = Number(field_credits[3]); // Upper Division credits required
 
@@ -47,7 +47,7 @@ export const reqsParse = (input) => {
   $("table.degReqTBL:first")
     .find("tr")
     .each((index, element) => {
-      titleRow = $(element).find('b[style="font-size:16px;"]').text().trim(); // Checks for section title formatting
+      let titleRow = $(element).find('b[style="font-size:16px;"]').text().trim(); // Checks for section title formatting
       if (titleRow != "") {
         // If section title found:
         if (req[`section_title`] != "") {
