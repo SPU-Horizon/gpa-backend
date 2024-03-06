@@ -16,22 +16,12 @@ export async function parseAndUpload(req, res) {
   // Access the file through req.file
   const file = req.file;
 
-  // Handle the file as needed
-  console.log("Received file:", file);
-
   let parsedCourses = courseParse(file.path);
   let parsedRequirements = reqsParse(file.path);
 
-  /* -------- TESTING -------- */
-  /* 
-  parsedCourses.student_id = 12;
-  parsedCourses.graduation_year = 2025;
-  parsedCourses.graduation_quarter = "spring";
-  */
-
   // Currently, we need to pass in a student_id, graduation_year, and graduation_quarter that are not being parsed correctly
-  parsedCourses.student_id = 1;
-  
+  parsedCourses.student_id = req.body.student_id;
+
   try {
     await fs.unlink(file.path);
     console.log("File removed successfully.");
@@ -39,13 +29,18 @@ export async function parseAndUpload(req, res) {
     console.error("Error removing file:", error);
   }
 
-  await addEnrollments(parsedCourses);
+  try {
+    await addEnrollments(parsedCourses);
+  } catch (error) {
+    let response = {};
+    response.msg = "Error adding enrollments";
+    res.status(500);
+  }
 
   // Respond to the client
   const response = {};
   let majorRequirements = parsedRequirements.requirements;
   response.msg = "Courses parsed successfully";
   response.data = { parsedCourses, majorRequirements };
-  res.status(200);
-  res.send(response);
+  res.status(200).send(response);
 }

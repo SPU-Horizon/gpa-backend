@@ -43,8 +43,13 @@ export const courseParse = (input) => {
 
   //Get advisors
   const advisorText = $('b:contains("Advisors:")').parent().text();
-  const advisorList = advisorText.slice(advisorText.indexOf("Advisors:") + 9, advisorText.indexOf("(Change Your Advisors)")).split(",");
-  for(let i = 0; i < advisorList.length; i++) {
+  const advisorList = advisorText
+    .slice(
+      advisorText.indexOf("Advisors:") + 9,
+      advisorText.indexOf("(Change Your Advisors)")
+    )
+    .split(",");
+  for (let i = 0; i < advisorList.length; i++) {
     let advisor = advisorList[i];
     if (advisor.includes("(")) {
       advisor = advisor.split("(");
@@ -84,7 +89,7 @@ export const courseParse = (input) => {
   output[`field`] = [majorList, minorList];
 
   //Extract table
-  const enrollments = [];
+  let enrollments = [];
   var subject = "";
 
   $("table.dhckDataWB:first").each((index, element) => {
@@ -122,21 +127,25 @@ export const courseParse = (input) => {
       });
   });
 
-  //Put classes taken into output
+  //Filter out all the LDEL classes
+  // Next issue to fix is that we should be able to have classes with the same course ID
+  enrollments = enrollments.filter((enrollment) => {
+    if (
+      enrollment.course_id &&
+      typeof enrollment.course_id === "string" &&
+      !enrollment.course_id.includes("LDEL")
+    ) {
+      return enrollment;
+    }
+  });
+
+  console.log(enrollments);
   output[`enrollments`] = enrollments;
-  // //TEST OUTPUT
+
+  // TEST OUTPUT
   // console.log(output);
 
-  // //Write JSON data to file
-  // fs.writeFileSync('output.json', JSON.stringify(output, null, 2))
-
-  //Write to JSON object
-  const json = JSON.stringify(output, null, 2);
   return output;
-
-  // console.log('HTML parsing complete.');
 };
 
 export default courseParse;
-
-// courseParse("./something.htm");
