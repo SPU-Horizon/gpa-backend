@@ -57,7 +57,7 @@ export async function registerUser({ first_name, last_name, email, avatar }) {
   const [result] = await pool.query(
     `
         INSERT INTO student (first_name, last_name, email, avatar, field_requirements)
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
         `,
     [first_name, last_name, email, avatar, []]
   );
@@ -172,19 +172,23 @@ export async function addEnrollments({
       }
     }
 
-    await pool.query(
-      `
+    try {
+      await pool.query(
+        `
             INSERT INTO enrollment (student_id, course_id, year, quarter, grade)
             VALUES (?, ?, ?, ?, ?)
             `,
-      [
-        student_id,
-        enrollment.course_id,
-        enrollment.year,
-        enrollment.quarter,
-        enrollment.grade,
-      ]
-    );
+        [
+          student_id,
+          enrollment.course_id,
+          enrollment.year,
+          enrollment.quarter,
+          enrollment.grade,
+        ]
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return result.insertId;
