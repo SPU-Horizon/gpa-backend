@@ -54,15 +54,40 @@ export async function userExists(email) {
 // accepts an object with first_name, last_name, email, and avatar properties
 // returns the student_id of the newly registered user
 export async function registerUser({ first_name, last_name, email, avatar }) {
-  const [result] = await pool.query(
-    `
-        INSERT INTO student (first_name, last_name, email, avatar, field_requirements)
-        VALUES (?, ?, ?, ?, ?)
-        `,
-    [first_name, last_name, email, avatar, []]
-  );
+  try {
+    const [result] = await pool.query(
+      `
+          INSERT INTO student (first_name, last_name, email, avatar, field_requirements)
+          VALUES (?, ?, ?, ?, ?)
+          `,
+      [first_name, last_name, email, avatar, []]
+    );
+  
+    return result.insertId;
+  }
+  catch (error) {
+    return null;
+  }  
+}
 
-  return result.insertId;
+// update a user's avatar
+// accepts a student_id and avatar (encoded at text) as parameters
+// return true if the avatar was updated successfully
+export async function updateAvatar(student_id, avatar) {
+  try {
+    await pool.query(
+      `
+        UPDATE student
+        SET avatar = ?
+        WHERE student_id = ?
+      `,
+      [avatar, student_id]
+    );
+  }
+  catch (error) {
+    return false;
+  }
+  return true;
 }
 
 // get a user's information
