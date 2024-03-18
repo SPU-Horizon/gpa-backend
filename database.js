@@ -51,16 +51,16 @@ export async function userExists(email) {
 }
 
 // register a new user
-// accepts an object with first_name, last_name, email, and avatar properties
+// accepts an object with first_name, last_name, and email properties
 // returns the student_id of the newly registered user
-export async function registerUser({ first_name, last_name, email, avatar }) {
+export async function registerUser(first_name, last_name, email) {
   try {
     const [result] = await pool.query(
       `
-          INSERT INTO student (first_name, last_name, email, avatar, field_requirements)
-          VALUES (?, ?, ?, ?, ?)
+          INSERT INTO student (first_name, last_name, email)
+          VALUES (?, ?, ?)
           `,
-      [first_name, last_name, email, avatar, []]
+      [first_name, last_name, email]
     );
   
     return result.insertId;
@@ -92,131 +92,118 @@ export async function updateAvatar(student_id, avatar) {
 
 // get a user's information
 // accepts an email as parameter
-// returns an object with student_id, first_name, last_name, email, avatar, graduation_year, and graduation_quarter properties
+// returns an object with properties student_id, first_name, last_name, avatar, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
+// counselor_id, counselor_name, counselor_email, counselor_phone, counselor_avatar, and fields
 export async function getUser(email) {
-  let [[user]] = await pool.query(
-    `
-        SELECT student_id, first_name, last_name, avatar, graduation_year, graduation_quarter, field_requirements
-        FROM student
-        WHERE email = ?
-        `,
-    [email]
-  );
+  try {
+    let [[user]] = await pool.query(
+      `
+          SELECT student_id, first_name, last_name, avatar, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
+          student.counselor_id AS counselor_id, full_name AS counselor_name, counselor.email AS counselor_email, phone AS counselor_phone, counselor.avatar AS counselor_avatar
+          FROM student
+          INNER JOIN counselor ON student.counselor_id = counselor.counselor_id
+          WHERE student.email = ?
+          `,
+      [email]
+    );
 
-  let fields = [];
+    let [fields] = await pool.query(
+      `
+          SELECT name, type, year, quarter
+          FROM student_field
+          WHERE student_id = ?
+          `,
+      [user.student_id]
+    );
 
-  if (user.field_requirements) {
-    for (let field of user.field_requirements) {
-      fields.push({
-        name: field.field_name,
-        type: field.field_type,
-      });
-    }
+    user.fields = fields;
+
+    return user;
   }
-  delete user.field_requirements;
-  user.fields = fields;
-
-  return user;
+  catch (error) {
+    return false;
+  }
 }
 
 // add enrollments for a student
 // accepts an object with student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, and enrollments properties
 // enrollments is an array of objects with course_id, year, quarter, and grade properties
 // returns the student_id of the student whose enrollments were added
-export async function addEnrollments({
-  student_id,
-  enrollment_year,
-  enrollment_quarter,
-  graduation_year,
-  graduation_quarter,
-  enrollments,
-}) {
-  const [result] = await pool.query(
-    `
-        UPDATE student
-        SET enrollment_year = ?, enrollment_quarter = ?, graduation_year = ?, graduation_quarter = ?
-        WHERE student_id = ?
-        `,
-    [
-      enrollment_year,
-      enrollment_quarter,
-      graduation_year,
-      graduation_quarter,
-      student_id,
-    ]
-  );
+export async function addEnrollments({student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, enrollments}) {
+  try {
+    await pool.query(
+      `
+          UPDATE student
+          SET enrollment_year = ?, enrollment_quarter = ?, graduation_year = ?, graduation_quarter = ?
+          WHERE student_id = ?
+          `,
+      [enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, student_id]
+    );
 
-  for (let enrollment of enrollments) {
-    if (isNaN(enrollment.grade)) {
-      switch (enrollment.grade) {
-        case "A":
-          enrollment.grade = 4.0;
-          break;
-        case "A-":
-          enrollment.grade = 3.7;
-          break;
-        case "B+":
-          enrollment.grade = 3.3;
-          break;
-        case "B":
-          enrollment.grade = 3.0;
-          break;
-        case "B-":
-          enrollment.grade = 2.7;
-          break;
-        case "C+":
-          enrollment.grade = 2.3;
-          break;
-        case "C":
-          enrollment.grade = 2.0;
-          break;
-        case "C-":
-          enrollment.grade = 1.7;
-          break;
-        case "D+":
-          enrollment.grade = 1.3;
-          break;
-        case "D":
-          enrollment.grade = 1.0;
-          break;
-        case "E":
-          enrollment.grade = 0.0;
-          break;
-        case "P":
-          enrollment.grade = 0.0;
-          break;
-        case "NC":
-          enrollment.grade = 0.0;
-          break;
-        case "AU":
-          enrollment.grade = 0.0;
-          break;
-        default:
-          enrollment.grade = null;
-          break;
+    for (let enrollment of enrollments) {
+      if (isNaN(enrollment.grade)) {
+        switch (enrollment.grade) {
+          case "A":
+            enrollment.grade = 4.0;
+            break;
+          case "A-":
+            enrollment.grade = 3.7;
+            break;
+          case "B+":
+            enrollment.grade = 3.3;
+            break;
+          case "B":
+            enrollment.grade = 3.0;
+            break;
+          case "B-":
+            enrollment.grade = 2.7;
+            break;
+          case "C+":
+            enrollment.grade = 2.3;
+            break;
+          case "C":
+            enrollment.grade = 2.0;
+            break;
+          case "C-":
+            enrollment.grade = 1.7;
+            break;
+          case "D+":
+            enrollment.grade = 1.3;
+            break;
+          case "D":
+            enrollment.grade = 1.0;
+            break;
+          case "E":
+            enrollment.grade = 0.0;
+            break;
+          case "P":
+            enrollment.grade = 0.0;
+            break;
+          case "NC":
+            enrollment.grade = 0.0;
+            break;
+          case "AU":
+            enrollment.grade = 0.0;
+            break;
+          default:
+            enrollment.grade = null;
+            break;
+        }
       }
-    }
 
-    try {
       await pool.query(
         `
             INSERT INTO enrollment (student_id, course_id, year, quarter, grade)
             VALUES (?, ?, ?, ?, ?)
             `,
-        [
-          student_id,
-          enrollment.course_id,
-          enrollment.year,
-          enrollment.quarter,
-          enrollment.grade,
-        ]
+        [student_id, enrollment.course_id, enrollment.year, enrollment.quarter, enrollment.grade]
       );
-    } catch (error) {
-      console.log(error);
     }
+  } catch (error) {
+    return false;
   }
 
-  return result.insertId;
+  return true;
 }
 
 // get all enrollments for a user
@@ -226,27 +213,42 @@ export async function addEnrollments({
 // past is an array of courses the student has completed
 // gpa is the student's 4.0 grade point average
 export async function getEnrollments(email) {
-  const [current] = await pool.query(
-    `
-        SELECT enrollment.course_id AS course_id, name, description, credits, attributes
-        FROM student
-        INNER JOIN enrollment ON student.student_id = enrollment.student_id
-        INNER JOIN course ON enrollment.course_id = course.course_id
-        WHERE email = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter >= "${currentQuarter()}"))
-        `,
-    [email]
-  );
+  try {
+    const [future] = await pool.query(
+      `
+          SELECT enrollment.course_id AS course_id, name, description, credits, attributes
+          FROM student
+          INNER JOIN enrollment ON student.student_id = enrollment.student_id
+          INNER JOIN course ON enrollment.course_id = course.course_id
+          WHERE email = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}"))
+          `,
+      [email]
+    );
+    const [current] = await pool.query(
+      `
+          SELECT enrollment.course_id AS course_id, name, description, credits, attributes
+          FROM student
+          INNER JOIN enrollment ON student.student_id = enrollment.student_id
+          INNER JOIN course ON enrollment.course_id = course.course_id
+          WHERE email = ? AND year = ${currentYear} AND quarter = "${currentQuarter()}"
+          `,
+      [email]
+    );
 
-  const [past] = await pool.query(
-    `
-        SELECT enrollment.course_id AS course_id, name, description, credits, attributes, year, quarter, grade
-        FROM student
-        INNER JOIN enrollment ON student.student_id = enrollment.student_id
-        INNER JOIN course ON enrollment.course_id = course.course_id
-        WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
-        `,
-    [email]
-  );
+    const [past] = await pool.query(
+      `
+          SELECT enrollment.course_id AS course_id, name, description, credits, attributes, year, quarter, grade
+          FROM student
+          INNER JOIN enrollment ON student.student_id = enrollment.student_id
+          INNER JOIN course ON enrollment.course_id = course.course_id
+          WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
+          `,
+      [email]
+    );
+  }
+  catch (error) {
+    return false;
+  }
 
   let qualityPoints = 0;
   let totalCredits = 0;
@@ -270,11 +272,48 @@ export async function getEnrollments(email) {
     }
   };
 
-  return { current: current, past: past, gpa: gpa() };
+  return {current: current, past: past, future: future, gpa: gpa()};
 }
 
-export async function addFieldRequirements(student_id, field_requirements) {}
+// add a new field for a student with its requirements in JSON format
+// accepts student_id, name, type, year, quarter, ud_credits, total_credits, and requirements as parameters
+// returns true if the field was added successfully
+export async function addStudentField(student_id, name, type, year, quarter, ud_credits, total_credits, requirements) {
+  try {
+    await pool.query(
+      `
+        INSERT INTO student_field (student_id, name, type, year, quarter, ud_credits, total_credits, requirements)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      [student_id, name, type, year, quarter, ud_credits, total_credits, requirements]
+    );
+  }
+  catch (error) {
+    return false;
+  }
+  return true;
+}
 
+// delete a field for a student
+// accepts student_id, name, type, year, and quarter as parameters
+// returns true if the field was deleted successfully
+export async function deleteStudentField(student_id, name, type, year, quarter) {
+  try {
+    await pool.query(
+      `
+        DELETE FROM student_field
+        WHERE student_id = ? AND name = ? AND type = ? AND year = ? AND quarter = ?
+      `,
+      [student_id, name, type, year, quarter]
+    );
+  }
+  catch (error) {
+    return false;
+  }
+  return true;
+}
+
+// NOT FUNCTIONAL DUE TO DATABASE DESIGN CHANGES
 export async function getRequiredClasses(student_id) {
   const [past_enrollments] = await pool.query(
     `

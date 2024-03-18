@@ -9,6 +9,7 @@ counselor_id TINYINT UNSIGNED AUTO_INCREMENT,
 full_name VARCHAR(70) NOT NULL,
 email VARCHAR(254) NOT NULL,
 phone VARCHAR(15) NOT NULL,
+avatar TEXT,
 PRIMARY KEY(counselor_id)
 );
 
@@ -23,9 +24,21 @@ enrollment_year YEAR,
 enrollment_quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 graduation_year YEAR,
 graduation_quarter ENUM('autumn', 'winter', 'spring', 'summer'),
-field_requirements JSON,
 PRIMARY KEY (student_id),
 FOREIGN KEY (counselor_id) REFERENCES counselor (counselor_id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS student_field (
+student_id SMALLINT UNSIGNED,
+name VARCHAR(72),
+type ENUM('major', 'minor', 'program'),
+year YEAR,
+quarter ENUM('autumn', 'winter', 'spring', 'summer'),
+ud_credits TINYINT UNSIGNED,
+total_credits TINYINT UNSIGNED,
+requirements JSON,
+PRIMARY KEY (student_id, name, type, year, quarter),
+FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS course (

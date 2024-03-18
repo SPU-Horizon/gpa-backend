@@ -1,6 +1,5 @@
 INSERT INTO student (student_id, first_name, last_name, email, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter)
 VALUE (1, 'John', 'Appleseed', 'john@spu.edu', 2020, 'autumn', 2024, 'spring');
--- field requirements
 
 -- INSERT INTO enrollment (student_id, course_id, year, quarter, grade) VALUES
 -- (1, 'CSC 1230', 2024,'autumn', 4.0),
