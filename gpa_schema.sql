@@ -82,3 +82,12 @@ PRIMARY KEY (student_id, course_id, year, quarter),
 FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+-- CREATE TRIGGER course_recurrence
+-- AFTER INSERT ON section
+-- FOR EACH ROW
+-- BEGIN
+-- IF 
+-- THEN 
+-- ENDIF
+-- END;

@@ -121,7 +121,7 @@ export async function getUser(email) {
     return user;
   }
   catch (error) {
-    return false;
+    return null;
   }
 }
 
@@ -129,7 +129,7 @@ export async function getUser(email) {
 // accepts an object with student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, and enrollments properties
 // enrollments is an array of objects with course_id, year, quarter, and grade properties
 // returns the student_id of the student whose enrollments were added
-export async function addEnrollments({student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, enrollments}) {
+export async function addEnrollments(student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, enrollments) {
   try {
     await pool.query(
       `
@@ -139,7 +139,13 @@ export async function addEnrollments({student_id, enrollment_year, enrollment_qu
           `,
       [enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, student_id]
     );
+  }
+  catch (error) {
+    return -1;
+  }
+  let failedEnrollments = [];
 
+  try {
     for (let enrollment of enrollments) {
       if (isNaN(enrollment.grade)) {
         switch (enrollment.grade) {
@@ -200,10 +206,10 @@ export async function addEnrollments({student_id, enrollment_year, enrollment_qu
       );
     }
   } catch (error) {
-    return false;
+    failedEnrollments.push(enrollment);
   }
 
-  return true;
+  return failedEnrollments;
 }
 
 // get all enrollments for a user
@@ -216,7 +222,7 @@ export async function getEnrollments(email) {
   try {
     const [future] = await pool.query(
       `
-          SELECT enrollment.course_id AS course_id, name, description, credits, attributes
+          SELECT enrollment.course_id AS course_id, name, description, credits, attributes, year, quarter
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
@@ -226,7 +232,7 @@ export async function getEnrollments(email) {
     );
     const [current] = await pool.query(
       `
-          SELECT enrollment.course_id AS course_id, name, description, credits, attributes
+          SELECT enrollment.course_id AS course_id, name, description, credits, attributes, year, quarter
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
@@ -247,14 +253,14 @@ export async function getEnrollments(email) {
     );
   }
   catch (error) {
-    return false;
+    return -1;
   }
 
   let qualityPoints = 0;
   let totalCredits = 0;
-
   let credits;
   let grade;
+
   for (let course of past) {
     credits = parseInt(course.credits);
     grade = parseFloat(course.grade);
@@ -263,6 +269,7 @@ export async function getEnrollments(email) {
       qualityPoints += grade * credits;
     }
   }
+  
   const gpa = function () {
     switch (totalCredits) {
       case 0:
