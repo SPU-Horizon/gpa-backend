@@ -3,14 +3,14 @@
 // Note: Only tested with Computer Science B.S. requirements so far; further testing and refinement needed
 
 import fs from "fs";
-import cheerio from "cheerio";
+import { load } from "cheerio";
 
 export const reqsParse = (input) => {
   //Read in degree check HTML
   const degCheck = fs.readFileSync(input, "utf8");
 
   //Load HTML
-  const $ = cheerio.load(degCheck);
+  const $ = load(degCheck);
 
   const output = {};
 
@@ -23,10 +23,12 @@ export const reqsParse = (input) => {
   output[`field_name`] = fName;
   if (fName.includes("Minor")) {
     output[`field_type`] = "Minor";
-  } else if (fName.includes("BA") || fName.includes("BS") || fName.includes("Major") || fName.includes("Certificate")) {
-    output[`field_type`] = "Major";
-  } else {
+  } else if ((fName.includes("Certification") && !fName.includes("Education")) || 
+             (fName.includes("Pre-") && !fName.includes("Social")) || 
+              fName.includes("University Scholars")) {
     output[`field_type`] = "Program";
+  } else {
+    output[`field_type`] = "Major";
   }
   output[`year`] = field.slice(field.lastIndexOf("Catalog") - 8,field.indexOf("Catalog") - 1); // Catalog year
   let field_credits = $("div.heading").find("i").text().split(" ");
@@ -63,7 +65,7 @@ export const reqsParse = (input) => {
         req[`comment`] = false;
       } else if (
         $(element).hasClass("degReqRowA") ||
-        $(element).hasClass("degReqRowA")
+        $(element).hasClass("degReqRowB")
       ) {
         // Otherwise, check the row for degReqRow classes
         $(element)
@@ -94,8 +96,9 @@ export const reqsParse = (input) => {
 
   //Put requirements data into output
   output[`requirements`] = reqs;
-  // //TEST OUTPUT
+  //TEST OUTPUT
   // console.log(output);
+  // console.log(reqs);
 
   // //Write JSON data to file
   // fs.writeFileSync('reqs.json', JSON.stringify(output, null, 2))
