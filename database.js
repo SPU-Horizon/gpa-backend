@@ -43,7 +43,7 @@ export async function userExists(email) {
     `
         SELECT * FROM student
         WHERE email = ?
-        `,
+    `,
     [email]
   );
 
@@ -59,7 +59,7 @@ export async function registerUser(first_name, last_name, email) {
       `
           INSERT INTO student (first_name, last_name, email)
           VALUES (?, ?, ?)
-          `,
+      `,
       [first_name, last_name, email]
     );
   
@@ -99,11 +99,11 @@ export async function getUser(email) {
     let [[user]] = await pool.query(
       `
           SELECT student_id, first_name, last_name, avatar, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
-          student.counselor_id AS counselor_id, full_name AS counselor_name, counselor.email AS counselor_email, phone AS counselor_phone, counselor.avatar AS counselor_avatar
+          student.counselor_id AS counselor_id, name AS counselor_name, counselor.email AS counselor_email, phone AS counselor_phone, counselor.avatar AS counselor_avatar
           FROM student
           INNER JOIN counselor ON student.counselor_id = counselor.counselor_id
           WHERE student.email = ?
-          `,
+      `,
       [email]
     );
 
@@ -112,7 +112,7 @@ export async function getUser(email) {
           SELECT name, type, year, quarter
           FROM student_field
           WHERE student_id = ?
-          `,
+      `,
       [user.student_id]
     );
 
@@ -136,7 +136,7 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
           UPDATE student
           SET enrollment_year = ?, enrollment_quarter = ?, graduation_year = ?, graduation_quarter = ?
           WHERE student_id = ?
-          `,
+      `,
       [enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, student_id]
     );
   }
@@ -197,11 +197,20 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
         }
       }
 
+      enrollment.course_id = await pool.query(
+        `
+            SELECT course_id
+            FROM course
+            WHERE code = ?
+        `,
+        [enrollment.course_id]
+      )[0][0].course_id;
+
       await pool.query(
         `
             INSERT INTO enrollment (student_id, course_id, year, quarter, grade)
             VALUES (?, ?, ?, ?, ?)
-            `,
+        `,
         [student_id, enrollment.course_id, enrollment.year, enrollment.quarter, enrollment.grade]
       );
     }
@@ -222,33 +231,33 @@ export async function getEnrollments(email) {
   try {
     const [future] = await pool.query(
       `
-          SELECT enrollment.course_id AS course_id, name, description, credits, attributes, year, quarter
+          SELECT code AS course_id, name, description, credits, attributes, year, quarter
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
           WHERE email = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}"))
-          `,
+      `,
       [email]
     );
     const [current] = await pool.query(
       `
-          SELECT enrollment.course_id AS course_id, name, description, credits, attributes, year, quarter
+          SELECT code AS course_id, name, description, credits, attributes, year, quarter
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
           WHERE email = ? AND year = ${currentYear} AND quarter = "${currentQuarter()}"
-          `,
+      `,
       [email]
     );
 
     const [past] = await pool.query(
       `
-          SELECT enrollment.course_id AS course_id, name, description, credits, attributes, year, quarter, grade
+          SELECT code AS course_id, name, description, credits, attributes, year, quarter, grade
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
           WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
-          `,
+      `,
       [email]
     );
   }
@@ -327,7 +336,7 @@ export async function getRequiredClasses(student_id) {
         SELECT course_id
         FROM enrollment
         WHERE student_id = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}")) AND grade >= 2.0
-        `,
+    `,
     [student_id]
   );
 
@@ -338,7 +347,7 @@ export async function getRequiredClasses(student_id) {
         SELECT field_requirements
         FROM student
         WHERE student_id = ?
-        `,
+    `,
     [student_id]
   );
 
@@ -354,9 +363,9 @@ export async function getRequiredClasses(student_id) {
 
   [courses_detail] = await pool.query(
     `
-    SELECT course_id, name, credits, attributes, standing, restrictions, prerequisites, corequisites, approval_required, last_offered, recurrence_year, recurrence_quarter, recurrence_classes
-    FROM course
-    WHERE course_id IN ?
+      SELECT course_id, name, credits, attributes, standing, restrictions, prerequisites, corequisites, approval_required, last_offered, recurrence_year, recurrence_quarter, recurrence_classes
+      FROM course
+      WHERE course_id IN ?
     `,
     [required_classes]
   );
