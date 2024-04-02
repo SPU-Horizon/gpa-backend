@@ -28,14 +28,14 @@ export async function parseAndUpload(req, res) {
   } catch (error) {
     console.error("Error removing file:", error);
   }
-
-  try {
-    await addEnrollments(parsedCourses);
-  } catch (error) {
-    return res.status(500).send({
-      error: "There was an issue uploading your data to the database.",
-    });
-  }
+ //
+  // try {
+  //   await addEnrollments(parsedCourses);
+  // } catch (error) {
+  //   return res.status(500).send({
+  //     error: "There was an issue uploading your data to the database.",
+  //   });
+  // }
 
   // Respond to the client
   const response = {};

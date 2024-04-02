@@ -14,9 +14,6 @@ export const reqsParse = (input) => {
 
   const output = {};
 
-  //Field ID ignored for now
-  output[`field_id`] = null;
-
   //Parse field information
   const field = $("div.heading").text();
   const fName = field.slice(0, field.lastIndexOf("Catalog") - 9); // Name
@@ -43,8 +40,7 @@ export const reqsParse = (input) => {
   req[`section_title`] = ""; // Title text for the section containing this group
   req[`credits_required`] = 0; // Credits required for this group
   req[`classes`] = []; // List of classes in the group
-  req[`comment`] = false; // "true" if this is an empty group where only the section title text is relevant; each section has
-  // one of these at the end to assist later formatting
+
 
   $("table.degReqTBL:first")
     .find("tr")
@@ -53,8 +49,6 @@ export const reqsParse = (input) => {
       if (titleRow != "") {
         // If section title found:
         if (req[`section_title`] != "") {
-          // Push the previous section title as an empty comment group
-          req[`comment`] = true;
           reqs.push(req);
         }
         req = {}; // Reinitialize req with a new section title
@@ -62,7 +56,6 @@ export const reqsParse = (input) => {
         req[`section_title`] = title;
         req[`credits_required`] = 0;
         req[`classes`] = [];
-        req[`comment`] = false;
       } else if (
         $(element).hasClass("degReqRowA") ||
         $(element).hasClass("degReqRowB")
@@ -80,7 +73,11 @@ export const reqsParse = (input) => {
                     req[`classes`].push($(e).text().trim().split(" ")[0]); // invisible split character is &nbsp; or U+00a0
                   });
               case 1: // From the second, grab the credits required.
-                req[`credits_required`] = parseInt($(elem).text().trim());
+                let credits_required = parseInt($(elem).text().trim());
+                if(!isNaN(credits_required)) {
+                  req[`credits_required`] += credits_required;
+                }
+                
             }
           });
         reqs.push(req); // Push and reinitialize req with the current section title
@@ -88,17 +85,15 @@ export const reqsParse = (input) => {
         req[`section_title`] = title;
         req[`credits_required`] = 0;
         req[`classes`] = [];
-        req[`comment`] = false;
       }
     });
-  if (req[`credits_required`] === 0) req[`comment`] = true;
   reqs.push(req);
 
   //Put requirements data into output
   output[`requirements`] = reqs;
   //TEST OUTPUT
-  // console.log(output);
-  // console.log(reqs);
+  console.log(output);
+  console.log(reqs);
 
   // //Write JSON data to file
   // fs.writeFileSync('reqs.json', JSON.stringify(output, null, 2))
