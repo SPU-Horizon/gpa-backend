@@ -42,7 +42,7 @@ FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UP
 );
 
 CREATE TABLE IF NOT EXISTS course (
-course_id TINYINT UNSIGNED AUTO_INCREMENT,
+course_id SMALLINT UNSIGNED AUTO_INCREMENT,
 code VARCHAR(15) NOT NULL,
 name VARCHAR(104) NOT NULL,
 description TEXT,
@@ -62,7 +62,7 @@ PRIMARY KEY (course_id)
 
 CREATE TABLE IF NOT EXISTS section (
 section_id SMALLINT UNSIGNED,
-course_id TINYINT UNSIGNED NOT NULL,
+course_id SMALLINT UNSIGNED NOT NULL,
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 topic TINYTEXT,
@@ -75,7 +75,7 @@ FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE CASCADE ON UPDAT
 
 CREATE TABLE IF NOT EXISTS enrollment (
 student_id SMALLINT UNSIGNED,
-course_id TINYINT UNSIGNED,
+course_id SMALLINT UNSIGNED,
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 grade DECIMAL(2, 1),

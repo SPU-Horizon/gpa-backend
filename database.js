@@ -265,14 +265,23 @@ export async function getEnrollments(email) {
     return -1;
   }
 
+  let courseGrade = new Map();
+
+  for  (let course of past) {
+    if (courseGrade.has(course.course_id)) {
+      courseGrade.set(course.course_id, {credits: course.credits, grade: Math.max(courseGrade.get(course.course_id).grade, course.grade)});
+    }
+    else {
+      courseGrade.set(course.course_id, {credits: course.credits, grade: course.grade});
+    }
+  }
+
   let qualityPoints = 0;
   let totalCredits = 0;
-  let credits;
-  let grade;
 
-  for (let course of past) {
-    credits = parseInt(course.credits);
-    grade = parseFloat(course.grade);
+  for (let course of courseGrade.values()) {
+    let credits = parseInt(course.credits);
+    let grade = parseFloat(course.grade);
     if (!isNaN(grade) && !isNaN(credits)) {
       totalCredits += credits;
       qualityPoints += grade * credits;
