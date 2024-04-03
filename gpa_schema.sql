@@ -79,9 +79,22 @@ course_id SMALLINT UNSIGNED,
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 grade DECIMAL(2, 1),
+credits DECIMAL(2, 1),
 PRIMARY KEY (student_id, course_id, year, quarter),
 FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE,
 FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS student_plan (
+plan_id MEDIUMINT UNSIGNED AUTO_INCREMENT,
+student_id SMALLINT UNSIGNED,
+name VARCHAR(254),
+max_credits TINYINT UNSIGNED,
+fields JSON,
+plan JSON,
+date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+PRIMARY KEY (plan_id),
+FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CREATE TRIGGER course_recurrence

@@ -143,6 +143,7 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
   catch (error) {
     return -1;
   }
+
   let failedEnrollments = [];
 
   try {
@@ -208,10 +209,10 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
 
       await pool.query(
         `
-            INSERT INTO enrollment (student_id, course_id, year, quarter, grade)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO enrollment (student_id, course_id, year, quarter, grade, credits)
+            VALUES (?, ?, ?, ?, ?, ?)
         `,
-        [student_id, enrollment.course_id, enrollment.year, enrollment.quarter, enrollment.grade]
+        [student_id, enrollment.course_id, enrollment.year, enrollment.quarter, enrollment.grade, enrollment.credits]
       );
     }
   } catch (error) {
@@ -231,7 +232,7 @@ export async function getEnrollments(email) {
   try {
     const [future] = await pool.query(
       `
-          SELECT code AS course_id, name, description, credits, attributes, year, quarter
+          SELECT code AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
@@ -241,7 +242,7 @@ export async function getEnrollments(email) {
     );
     const [current] = await pool.query(
       `
-          SELECT code AS course_id, name, description, credits, attributes, year, quarter
+          SELECT code AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
@@ -252,7 +253,7 @@ export async function getEnrollments(email) {
 
     const [past] = await pool.query(
       `
-          SELECT code AS course_id, name, description, credits, attributes, year, quarter, grade
+          SELECT code AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter, grade
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
