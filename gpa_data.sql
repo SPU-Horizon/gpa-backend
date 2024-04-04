@@ -1,14 +1,14 @@
 USE gpa;
 
-INSERT INTO counselor (name, email, phone) VALUES
-("Alison Howard", "howara@spu.edu", "206-281-2542"),
-("Jazmyne Krienen", "krienenj@spu.edu", "206-281-2245"),
-("Emily Morris", "morrise3@spu.edu", "206-281-2578"),
-("Annette Rendahl", "arendahl@spu.edu", "206-281-2539"),
-("Marisa Vogel", "mvogel@spu.edu", "206-281-2840");
+INSERT INTO counselor (counselor_id, name, email, phone) VALUES
+(1, "Alison Howard", "howara@spu.edu", "206-281-2542"),
+(2, "Jazmyne Krienen", "krienenj@spu.edu", "206-281-2245"),
+(3, "Emily Morris", "morrise3@spu.edu", "206-281-2578"),
+(4, "Annette Rendahl", "arendahl@spu.edu", "206-281-2539"),
+(5, "Marisa Vogel", "mvogel@spu.edu", "206-281-2840");
 
 INSERT INTO course (
-    code, 
+    course_id, 
     name, 
     description, 
     credits, 
@@ -30,5 +30,5 @@ INSERT INTO course (
 ("SPGE LWKSS","Ways of Knowing in the Social Sciences",NULL,NULL,"WKSS",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 ("SPGE LWE","Ways of Engaging",NULL,NULL,"WE",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 ("SPGE LCUE","Cultural Understanding and Engagement",NULL,NULL,"CUE",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-("HIS LDEL","Independent Project","Transfer Course",1.0,"","freshman","{}","{}","{}",0,NULL,NULL,NULL,NULL),
-("MAT LDEL","Independent Project","Transfer Course",1.0,"","freshman","{}","{}","{}",0,NULL,NULL,NULL,NULL);
+("HIS LDEL","Independent Project",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+("MAT LDEL","Independent Project",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);

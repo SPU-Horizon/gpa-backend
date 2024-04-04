@@ -70,26 +70,6 @@ export async function registerUser(first_name, last_name, email) {
   }  
 }
 
-// update a user's avatar
-// accepts a student_id and avatar (encoded at text) as parameters
-// return true if the avatar was updated successfully
-export async function updateAvatar(student_id, avatar) {
-  try {
-    await pool.query(
-      `
-        UPDATE student
-        SET avatar = ?
-        WHERE student_id = ?
-      `,
-      [avatar, student_id]
-    );
-  }
-  catch (error) {
-    return false;
-  }
-  return true;
-}
-
 // get a user's information
 // accepts an email as parameter
 // returns an object with properties student_id, first_name, last_name, avatar, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
@@ -98,8 +78,8 @@ export async function getUser(email) {
   try {
     let [[user]] = await pool.query(
       `
-          SELECT student_id, first_name, last_name, avatar, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
-          student.counselor_id AS counselor_id, name AS counselor_name, counselor.email AS counselor_email, phone AS counselor_phone, counselor.avatar AS counselor_avatar
+          SELECT student_id, first_name, last_name, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
+          student.counselor_id AS counselor_id, name AS counselor_name, counselor.email AS counselor_email, phone AS counselor_phone
           FROM student
           INNER JOIN counselor ON student.counselor_id = counselor.counselor_id
           WHERE student.email = ?
@@ -198,15 +178,6 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
         }
       }
 
-      enrollment.course_id = await pool.query(
-        `
-            SELECT course_id
-            FROM course
-            WHERE code = ?
-        `,
-        [enrollment.course_id]
-      )[0][0].course_id;
-
       await pool.query(
         `
             INSERT INTO enrollment (student_id, course_id, year, quarter, grade, credits)
@@ -228,38 +199,38 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
 // current is an array of courses the student is currently enrolled in
 // past is an array of courses the student has completed
 // gpa is the student's 4.0 grade point average
-export async function getEnrollments(email) {
+export async function getEnrollments(student_id) {
   try {
     const [future] = await pool.query(
       `
-          SELECT code AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
+          SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
-          WHERE email = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}"))
+          WHERE student_id = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}"))
       `,
-      [email]
+      [student_id]
     );
     const [current] = await pool.query(
       `
-          SELECT code AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
+          SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
-          WHERE email = ? AND year = ${currentYear} AND quarter = "${currentQuarter()}"
+          WHERE student_id = ? AND year = ${currentYear} AND quarter = "${currentQuarter()}"
       `,
-      [email]
+      [student_id]
     );
 
     const [past] = await pool.query(
       `
-          SELECT code AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter, grade
+          SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter, grade
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
-          WHERE email = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
+          WHERE student_id = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
       `,
-      [email]
+      [student_id]
     );
   }
   catch (error) {

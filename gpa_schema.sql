@@ -9,7 +9,6 @@ counselor_id TINYINT UNSIGNED AUTO_INCREMENT,
 name VARCHAR(70) NOT NULL,
 email VARCHAR(254) NOT NULL,
 phone VARCHAR(15) NOT NULL,
-avatar BLOB,
 PRIMARY KEY(counselor_id)
 );
 
@@ -18,7 +17,6 @@ student_id SMALLINT UNSIGNED AUTO_INCREMENT,
 first_name VARCHAR(35) NOT NULL,
 last_name VARCHAR(35) NOT NULL,
 email VARCHAR(254) NOT NULL UNIQUE,
-avatar BLOB,
 counselor_id TINYINT UNSIGNED,
 enrollment_year YEAR,
 enrollment_quarter ENUM('autumn', 'winter', 'spring', 'summer'),
@@ -42,8 +40,7 @@ FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UP
 );
 
 CREATE TABLE IF NOT EXISTS course (
-course_id SMALLINT UNSIGNED AUTO_INCREMENT,
-code VARCHAR(15) NOT NULL,
+course_id VARCHAR(15),
 name VARCHAR(104) NOT NULL,
 description TEXT,
 credits DECIMAL(2, 1),
@@ -62,7 +59,7 @@ PRIMARY KEY (course_id)
 
 CREATE TABLE IF NOT EXISTS section (
 section_id SMALLINT UNSIGNED,
-course_id SMALLINT UNSIGNED NOT NULL,
+course_id VARCHAR(15) NOT NULL,
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 topic TINYTEXT,
@@ -75,14 +72,14 @@ FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE CASCADE ON UPDAT
 
 CREATE TABLE IF NOT EXISTS enrollment (
 student_id SMALLINT UNSIGNED,
-course_id SMALLINT UNSIGNED,
+course_id VARCHAR(15),
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 grade DECIMAL(2, 1),
 credits DECIMAL(2, 1),
 PRIMARY KEY (student_id, course_id, year, quarter),
 FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS student_plan (
