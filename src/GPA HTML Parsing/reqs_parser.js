@@ -35,12 +35,14 @@ export const reqsParse = (input) => {
   //Parse field requirements
 
   const reqs = []; // Requirements array
+  var groups = []; // Inner array of requirement groups (only 1 except if OR)
   var req = {}; // Individual requirement group
   var title = "";
   req[`section_title`] = ""; // Title text for the section containing this group
   req[`credits_required`] = 0; // Credits required for this group
   req[`classes`] = []; // List of classes in the group
-
+  var is_or = false; // boolean for if this line is OR
+  var last_or = false; // boolean for if last line was OR
 
   $("table.degReqTBL:first")
     .find("tr")
@@ -49,21 +51,28 @@ export const reqsParse = (input) => {
       if (titleRow != "") {
         // If section title found:
         if (req[`section_title`] != "") {
-          reqs.push(req);
+          groups.push(req);
+          //TEST OUTPUT (uncomment all occurrences to test this level)
+          // console.log(groups);
+          reqs.push(groups);
         }
+        groups = []; // Reinitialize groups
         req = {}; // Reinitialize req with a new section title
         title = titleRow;
         req[`section_title`] = title;
         req[`credits_required`] = 0;
         req[`classes`] = [];
-      } else if (
+      } else if ( // Otherwise, check the row for degReqRow classes
         $(element).hasClass("degReqRowA") ||
         $(element).hasClass("degReqRowB")
       ) {
-        // Otherwise, check the row for degReqRow classes
         $(element)
           .children()
           .each((ind, elem) => {
+            // Check for OR:
+            if($(elem).text().trim().startsWith("OR") && $(elem).text().trim().length == 2) {
+              is_or = true;
+            }
             // If found, iterate through each child of the row (add cases if more info needed):
             switch (ind) {
               case 0: // From the first, grab each class from the table child and put it in the class list.
@@ -74,26 +83,47 @@ export const reqsParse = (input) => {
                   });
               case 1: // From the second, grab the credits required.
                 let credits_required = parseInt($(elem).text().trim());
-                if(!isNaN(credits_required)) {
-                  req[`credits_required`] += credits_required;
-                }
-                
+                if (isNaN(credits_required)) credits_required = 0;
+                req[`credits_required`] += credits_required;
             }
           });
-        reqs.push(req); // Push and reinitialize req with the current section title
+        if (is_or) { // If this line was OR, continue, setting last_or to true and is_or to false.
+          is_or = false;
+          last_or = true;
+        } else if (last_or) { // If the last line was OR, add this group to the previous set of groups.
+          groups = reqs.pop();
+          groups.push(req);
+          //TEST OUTPUT (uncomment all occurrences to test this level) 
+          // (note: will repost previous group set with new group added)
+          // console.log(groups);
+          reqs.push(groups);
+          last_or = false; // Also, reset last_or.
+        } else { // Otherwise, just push this requirement as a lone group.
+          groups.push(req);
+          //TEST OUTPUT (uncomment all occurrences to test this level)
+          // console.log(groups);
+          reqs.push(groups);
+        }
+        groups = [];
         req = {};
         req[`section_title`] = title;
         req[`credits_required`] = 0;
         req[`classes`] = [];
       }
     });
-  reqs.push(req);
+  if (last_or) {
+    groups = reqs.pop();
+  }
+  groups.push(req);
+  //TEST OUTPUT (uncomment all occurrences to test this level)
+  // console.log(groups);
+  reqs.push(groups);
 
   //Put requirements data into output
   output[`requirements`] = reqs;
   //TEST OUTPUT
-  console.log(output);
-  console.log(reqs);
+  // console.log(reqs);
+  // console.log(output);
 
   // //Write JSON data to file
   // fs.writeFileSync('reqs.json', JSON.stringify(output, null, 2))

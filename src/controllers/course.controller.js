@@ -28,7 +28,7 @@ export async function parseAndUpload(req, res) {
   } catch (error) {
     console.error("Error removing file:", error);
   }
- //
+ // TODO: Fix the error this keeps throwing when uncommented! Currently commented out so it doesn't bury testing results.
   // try {
   //   await addEnrollments(parsedCourses);
   // } catch (error) {
