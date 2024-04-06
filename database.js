@@ -120,7 +120,7 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
           SET enrollment_year = ?, enrollment_quarter = ?, graduation_year = ?, graduation_quarter = ?
           WHERE student_id = ?
       `,
-      [enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, student_id]
+      [enrollment_year, enrollment_quarter.toLowerCase(), graduation_year, graduation_quarter.toLowerCase(), student_id]
     );
   }
   catch (error) {
@@ -186,7 +186,7 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
             INSERT INTO enrollment (student_id, course_id, year, quarter, grade, credits)
             VALUES (?, ?, ?, ?, ?, ?)
         `,
-        [student_id, enrollment.course_id, enrollment.year, enrollment.quarter, enrollment.grade, enrollment.credits]
+        [student_id, enrollment.course_id, enrollment.year, enrollment.quarter.toLowerCase(), enrollment.grade, enrollment.credits]
       );
     }
     catch (error) {
@@ -289,7 +289,7 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
         INSERT INTO student_field (student_id, name, type, year, quarter, ud_credits, total_credits, requirements)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
-      [student_id, name, type, year, quarter, ud_credits, total_credits, requirements]
+      [student_id, name, type, year, quarter.toLowerCase(), ud_credits, total_credits, requirements]
     );
   }
   catch (error) {
@@ -309,7 +309,7 @@ export async function deleteStudentField(student_id, name, type, year, quarter) 
         DELETE FROM student_field
         WHERE student_id = ? AND name = ? AND type = ? AND year = ? AND quarter = ?
       `,
-      [student_id, name, type, year, quarter]
+      [student_id, name, type, year, quarter.toLowerCase()]
     );
   }
   catch (error) {
