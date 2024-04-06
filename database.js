@@ -203,8 +203,9 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
 // future is an array of courses the student is registered to take in a later quarter
 // gpa is the student's 4.0 grade point average
 export async function getEnrollments(student_id) {
+  let past, current, future;
   try {
-    const [future] = await pool.query(
+    [future] = await pool.query(
       `
           SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
           FROM student
@@ -214,7 +215,7 @@ export async function getEnrollments(student_id) {
       `,
       [student_id]
     );
-    const [current] = await pool.query(
+    [current] = await pool.query(
       `
           SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
           FROM student
@@ -225,7 +226,7 @@ export async function getEnrollments(student_id) {
       [student_id]
     );
 
-    const [past] = await pool.query(
+    [past] = await pool.query(
       `
           SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter, grade
           FROM student
