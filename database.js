@@ -127,8 +127,8 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
 
   let failedEnrollments = [];
 
-  try {
-    for (let enrollment of enrollments) {
+  for (let enrollment of enrollments) {
+    try {
       if (isNaN(enrollment.grade)) {
         switch (enrollment.grade) {
           case "A":
@@ -187,8 +187,9 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
         [student_id, enrollment.course_id, enrollment.year, enrollment.quarter, enrollment.grade, enrollment.credits]
       );
     }
-  } catch (error) {
-    failedEnrollments.push(enrollment);
+    catch (error) {
+      failedEnrollments.push(enrollment);
+    }
   }
 
   return failedEnrollments;
@@ -209,7 +210,7 @@ export async function getEnrollments(student_id) {
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
-          WHERE student_id = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}"))
+          WHERE enrollment.student_id = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}"))
       `,
       [student_id]
     );
@@ -219,7 +220,7 @@ export async function getEnrollments(student_id) {
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
-          WHERE student_id = ? AND year = ${currentYear} AND quarter = "${currentQuarter()}"
+          WHERE enrollment.student_id = ? AND year = ${currentYear} AND quarter = "${currentQuarter()}"
       `,
       [student_id]
     );
@@ -230,7 +231,7 @@ export async function getEnrollments(student_id) {
           FROM student
           INNER JOIN enrollment ON student.student_id = enrollment.student_id
           INNER JOIN course ON enrollment.course_id = course.course_id
-          WHERE student_id = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
+          WHERE enrollment.student_id = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
       `,
       [student_id]
     );
