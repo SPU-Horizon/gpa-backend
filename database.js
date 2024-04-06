@@ -66,6 +66,7 @@ export async function registerUser(first_name, last_name, email) {
     return result.insertId;
   }
   catch (error) {
+    console.log(error);
     return null;
   }  
 }
@@ -102,6 +103,7 @@ export async function getUser(email) {
     return user;
   }
   catch (error) {
+    console.log(error);
     return null;
   }
 }
@@ -122,7 +124,7 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
     );
   }
   catch (error) {
-    return -1;
+    console.log(error);
   }
 
   let failedEnrollments = [];
@@ -238,6 +240,7 @@ export async function getEnrollments(student_id) {
     );
   }
   catch (error) {
+    console.log(error);
     return -1;
   }
 
@@ -290,6 +293,7 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
     );
   }
   catch (error) {
+    console.log(error);
     return false;
   }
   return true;
@@ -309,6 +313,7 @@ export async function deleteStudentField(student_id, name, type, year, quarter) 
     );
   }
   catch (error) {
+    console.log(error);
     return false;
   }
   return true;
