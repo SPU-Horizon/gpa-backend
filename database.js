@@ -51,8 +51,8 @@ export async function userExists(email) {
 }
 
 // register a new user
-// accepts an object with first_name, last_name, and email properties
-// returns the student_id of the newly registered user
+// accepts first_name, last_name, and email parameters
+// returns the student_id of the newly registered user, otherwise returns null
 export async function registerUser(first_name, last_name, email) {
   try {
     const [result] = await pool.query(
@@ -72,8 +72,9 @@ export async function registerUser(first_name, last_name, email) {
 
 // get a user's information
 // accepts an email as parameter
-// returns an object with properties student_id, first_name, last_name, avatar, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
-// counselor_id, counselor_name, counselor_email, counselor_phone, counselor_avatar, and fields
+// returns an object with properties student_id, first_name, last_name, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
+// counselor_id, counselor_name, counselor_email, counselor_phone, and fields
+// Retuns null if the user does not exist
 export async function getUser(email) {
   try {
     let [[user]] = await pool.query(
@@ -106,9 +107,9 @@ export async function getUser(email) {
 }
 
 // add enrollments for a student
-// accepts an object with student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, and enrollments properties
-// enrollments is an array of objects with course_id, year, quarter, and grade properties
-// returns the student_id of the student whose enrollments were added
+// accepts student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, and enrollments parameters
+// enrollments is an array of objects with course_id, year, quarter, grade, and credits properties
+// returns -1 if no enrollments were added, otherwise returns an array of failed enrollments
 export async function addEnrollments(student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, enrollments) {
   try {
     await pool.query(
@@ -194,10 +195,11 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
 }
 
 // get all enrollments for a user
-// accepts email as parameter
-// returns an object with three properties: current, past, and gpa
+// accepts student_id as parameter
+// returns an object with properties: current, past, future, and gpa
 // current is an array of courses the student is currently enrolled in
 // past is an array of courses the student has completed
+// future is an array of courses the student is registered to take in a later quarter
 // gpa is the student's 4.0 grade point average
 export async function getEnrollments(student_id) {
   try {
