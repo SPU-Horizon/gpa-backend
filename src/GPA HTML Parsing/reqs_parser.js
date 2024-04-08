@@ -52,8 +52,6 @@ export const reqsParse = (input) => {
         // If section title found:
         if (req[`section_title`] != "") {
           groups.push(req);
-          //TEST OUTPUT (uncomment all occurrences to test this level)
-          // console.log(groups);
           reqs.push(groups);
         }
         groups = []; // Reinitialize groups
@@ -93,15 +91,11 @@ export const reqsParse = (input) => {
         } else if (last_or) { // If the last line was OR, add this group to the previous set of groups.
           groups = reqs.pop();
           groups.push(req);
-          //TEST OUTPUT (uncomment all occurrences to test this level) 
-          // (note: will repost previous group set with new group added)
-          // console.log(groups);
           reqs.push(groups);
           last_or = false; // Also, reset last_or.
         } else { // Otherwise, just push this requirement as a lone group.
           groups.push(req);
-          //TEST OUTPUT (uncomment all occurrences to test this level)
-          // console.log(groups);
+
           reqs.push(groups);
         }
         groups = [];
@@ -115,24 +109,17 @@ export const reqsParse = (input) => {
     groups = reqs.pop();
   }
   groups.push(req);
-  //TEST OUTPUT (uncomment all occurrences to test this level)
-  // console.log(groups);
   reqs.push(groups);
 
   //Put requirements data into output
   output[`requirements`] = reqs;
-  //TEST OUTPUT
-  // console.log(reqs);
-  // console.log(output);
-
-  // //Write JSON data to file
-  // fs.writeFileSync('reqs.json', JSON.stringify(output, null, 2))
 
   //Write to JSON object
   const json = JSON.stringify(output, null, 2);
+  // Test Output
+  // console.log(json);
   return json;
 
-  // console.log('HTML parsing complete.');
 };
 
 export default reqsParse;
