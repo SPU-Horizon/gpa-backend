@@ -28,14 +28,13 @@ export async function parseAndUpload(req, res) {
   } catch (error) {
     console.error("Error removing file:", error);
   }
- // TODO: Fix the error this keeps throwing when uncommented! Currently commented out so it doesn't bury testing results.
-  // try {
-  //   await addEnrollments(parsedCourses);
-  // } catch (error) {
-  //   return res.status(500).send({
-  //     error: "There was an issue uploading your data to the database.",
-  //   });
-  // }
+  try {
+    await addEnrollments(parsedCourses);
+  } catch (error) {
+    return res.status(500).send({
+      error: "There was an issue uploading your data to the database.",
+    });
+  }
 
   // Respond to the client
   const response = {};
