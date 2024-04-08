@@ -28,7 +28,6 @@ export async function parseAndUpload(req, res) {
   } catch (error) {
     console.error("Error removing file:", error);
   }
-
   try {
     await addEnrollments(parsedCourses);
   } catch (error) {

@@ -139,7 +139,7 @@ export const courseParse = (input) => {
     }
   });
 
-  console.log(enrollments);
+  // console.log(enrollments);
   output[`enrollments`] = enrollments;
 
   // TEST OUTPUT
