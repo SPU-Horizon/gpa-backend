@@ -81,7 +81,7 @@ export async function getUser(email) {
     let [[user]] = await pool.query(
       `
           SELECT student_id, first_name, last_name, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
-          student.counselor_id AS counselor_id, name AS counselor_name, counselor.email AS counselor_email, phone AS counselor_phone
+          student.counselor_id AS counselor_id, name AS counselor_name, title AS counselor_title, counselor.email AS counselor_email, phone AS counselor_phone, last_names_served AS counselor_last_names_served, meeting_link AS counselor_meeting_link
           FROM student
           INNER JOIN counselor ON student.counselor_id = counselor.counselor_id
           WHERE student.email = ?
@@ -120,7 +120,13 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
           SET enrollment_year = ?, enrollment_quarter = ?, graduation_year = ?, graduation_quarter = ?
           WHERE student_id = ?
       `,
-      [enrollment_year, enrollment_quarter.toLowerCase(), graduation_year, graduation_quarter.toLowerCase(), student_id]
+      [
+        enrollment_year, 
+        typeof enrollment_quarter === "string" ? enrollment_quarter.toLowerCase() : null, 
+        graduation_year, 
+        typeof graduation_quarter === "string" ? graduation_quarter.toLowerCase() : null, 
+        student_id
+      ]
     );
   }
   catch (error) {
@@ -186,7 +192,14 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
             INSERT INTO enrollment (student_id, course_id, year, quarter, grade, credits)
             VALUES (?, ?, ?, ?, ?, ?)
         `,
-        [student_id, enrollment.course_id, enrollment.year, enrollment.quarter.toLowerCase(), enrollment.grade, enrollment.credits]
+        [
+          student_id, 
+          enrollment.course_id, 
+          enrollment.year, 
+          typeof enrollment.quarter === "string" ? enrollment.quarter.toLowerCase() : throwError("invalid quarter"), 
+          enrollment.grade, 
+          enrollment.credits
+        ]
       );
     }
     catch (error) {
@@ -289,7 +302,16 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
         INSERT INTO student_field (student_id, name, type, year, quarter, ud_credits, total_credits, requirements)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
-      [student_id, name, type, year, quarter.toLowerCase(), ud_credits, total_credits, requirements]
+      [
+        student_id, 
+        name, 
+        type, 
+        year, 
+        typeof quarter === "string" ? quarter.toLowerCase() : throwError("invalid quarter"), 
+        ud_credits, 
+        total_credits, 
+        requirements
+      ]
     );
   }
   catch (error) {
@@ -309,7 +331,13 @@ export async function deleteStudentField(student_id, name, type, year, quarter) 
         DELETE FROM student_field
         WHERE student_id = ? AND name = ? AND type = ? AND year = ? AND quarter = ?
       `,
-      [student_id, name, type, year, quarter.toLowerCase()]
+      [
+        student_id, 
+        name, 
+        type, 
+        year, 
+        typeof quarter === "string" ? quarter.toLowerCase() : throwError("invalid quarter")
+      ]
     );
   }
   catch (error) {

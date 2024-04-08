@@ -7,8 +7,11 @@ USE gpa;
 CREATE TABLE IF NOT EXISTS counselor (
 counselor_id TINYINT UNSIGNED AUTO_INCREMENT,
 name VARCHAR(70) NOT NULL,
+title VARCHAR(70) NOT NULL,
 email VARCHAR(254) NOT NULL,
 phone VARCHAR(15) NOT NULL,
+last_names_served VARCHAR(8),
+meeting_link VARCHAR(254),
 PRIMARY KEY(counselor_id)
 );
 

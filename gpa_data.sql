@@ -1,16 +1,19 @@
 USE gpa;
 
 INSERT INTO counselor (
-    counselor_id, 
-    name, 
-    email, 
-    phone
+   counselor_id, 
+   name, 
+   title,
+   email, 
+   phone,
+   last_names_served,
+   meeting_link
 ) VALUES
-(1, "Alison Howard", "howara@spu.edu", "206-281-2542"),
-(2, "Jazmyne Krienen", "krienenj@spu.edu", "206-281-2245"),
-(3, "Emily Morris", "morrise3@spu.edu", "206-281-2578"),
-(4, "Annette Rendahl", "arendahl@spu.edu", "206-281-2539"),
-(5, "Marisa Vogel", "mvogel@spu.edu", "206-281-2840");
+(1, "Alison Howard", "Assistant Director - Academic Counseling Operations", "howara@spu.edu", "206-281-2542", "Sn-Z", "https://calendly.com/howara"),
+(2, "Jazmyne Krienen", "Undergraduate Academic Counselor", "krienenj@spu.edu", "206-281-2245", "H-Mi", "https://calendly.com/krienenj"),
+(3, "Emily Morris", "Undergraduate Academic Counselor", "morrise3@spu.edu", "206-281-2578", "C-G", "https://calendly.com/morrise3"),
+(4, "Annette Rendahl", "Assistant Director — Undergraduate Academic Counseling", "arendahl@spu.edu", "206-281-2539", "A-B", "https://calendly.com/annetterendahl"),
+(5, "Marisa Vogel", "Undergraduate Academic Counselor", "mvogel@spu.edu", "206-281-2840", "Mo-Sm", "https://calendly.com/mvogel1");
 
 INSERT INTO course (
     course_id, 
