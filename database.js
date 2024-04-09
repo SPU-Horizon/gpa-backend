@@ -196,7 +196,7 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
           student_id, 
           enrollment.course_id, 
           enrollment.year, 
-          typeof enrollment.quarter === "string" ? enrollment.quarter.toLowerCase() : throwError("invalid quarter"), 
+          typeof enrollment.quarter === "string" ? enrollment.quarter.toLowerCase() : null, 
           enrollment.grade, 
           enrollment.credits
         ]
@@ -307,7 +307,7 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
         name, 
         type, 
         year, 
-        typeof quarter === "string" ? quarter.toLowerCase() : throwError("invalid quarter"), 
+        typeof quarter === "string" ? quarter.toLowerCase() : null, 
         ud_credits, 
         total_credits, 
         requirements
@@ -336,7 +336,7 @@ export async function deleteStudentField(student_id, name, type, year, quarter) 
         name, 
         type, 
         year, 
-        typeof quarter === "string" ? quarter.toLowerCase() : throwError("invalid quarter")
+        typeof quarter === "string" ? quarter.toLowerCase() : null
       ]
     );
   }
