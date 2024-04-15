@@ -21,6 +21,7 @@ first_name VARCHAR(35) NOT NULL,
 last_name VARCHAR(35) NOT NULL,
 email VARCHAR(254) NOT NULL UNIQUE,
 counselor_id TINYINT UNSIGNED,
+class_standing ENUM('undergraduate', 'post-baccalaureate', 'graduate', 'doctoral') NOT NULL,
 enrollment_year YEAR,
 enrollment_quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 graduation_year YEAR,
@@ -30,6 +31,7 @@ FOREIGN KEY (counselor_id) REFERENCES counselor (counselor_id) ON DELETE SET NUL
 );
 
 CREATE TABLE IF NOT EXISTS student_field (
+student_field_id SMALLINT UNSIGNED AUTO_INCREMENT UNIQUE,
 student_id SMALLINT UNSIGNED,
 name VARCHAR(72),
 type ENUM('major', 'minor', 'program'),
