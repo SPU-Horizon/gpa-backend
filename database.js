@@ -62,13 +62,12 @@ export async function registerUser(first_name, last_name, email) {
       `,
       [first_name, last_name, email]
     );
-  
+
     return result.insertId;
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return null;
-  }  
+  }
 }
 
 // get a user's information
@@ -83,7 +82,7 @@ export async function getUser(email) {
           SELECT student_id, first_name, last_name, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter,
           student.counselor_id AS counselor_id, name AS counselor_name, title AS counselor_title, counselor.email AS counselor_email, phone AS counselor_phone, last_names_served AS counselor_last_names_served, meeting_link AS counselor_meeting_link
           FROM student
-          INNER JOIN counselor ON student.counselor_id = counselor.counselor_id
+          LEFT JOIN counselor ON student.counselor_id = counselor.counselor_id
           WHERE student.email = ?
       `,
       [email]
@@ -101,8 +100,7 @@ export async function getUser(email) {
     user.fields = fields;
 
     return user;
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return null;
   }
@@ -112,7 +110,14 @@ export async function getUser(email) {
 // accepts student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, and enrollments parameters
 // enrollments is an array of objects with course_id, year, quarter, grade, and credits properties
 // returns -1 if no enrollments were added, otherwise returns an array of failed enrollments
-export async function addEnrollments(student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, enrollments) {
+export async function addEnrollments(
+  student_id,
+  enrollment_year,
+  enrollment_quarter,
+  graduation_year,
+  graduation_quarter,
+  enrollments
+) {
   try {
     await pool.query(
       `
@@ -121,15 +126,18 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
           WHERE student_id = ?
       `,
       [
-        enrollment_year, 
-        typeof enrollment_quarter === "string" ? enrollment_quarter.toLowerCase() : null, 
-        graduation_year, 
-        typeof graduation_quarter === "string" ? graduation_quarter.toLowerCase() : null, 
-        student_id
+        enrollment_year,
+        typeof enrollment_quarter === "string"
+          ? enrollment_quarter.toLowerCase()
+          : null,
+        graduation_year,
+        typeof graduation_quarter === "string"
+          ? graduation_quarter.toLowerCase()
+          : null,
+        student_id,
       ]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
   }
 
@@ -193,16 +201,17 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
             VALUES (?, ?, ?, ?, ?, ?)
         `,
         [
-          student_id, 
-          enrollment.course_id, 
-          enrollment.year, 
-          typeof enrollment.quarter === "string" ? enrollment.quarter.toLowerCase() : null, 
-          enrollment.grade, 
-          enrollment.credits
+          student_id,
+          enrollment.course_id,
+          enrollment.year,
+          typeof enrollment.quarter === "string"
+            ? enrollment.quarter.toLowerCase()
+            : null,
+          enrollment.grade,
+          enrollment.credits,
         ]
       );
-    }
-    catch (error) {
+    } catch (error) {
       failedEnrollments.push(enrollment);
     }
   }
@@ -251,20 +260,24 @@ export async function getEnrollments(student_id) {
       `,
       [student_id]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return -1;
   }
 
   let courseGrade = new Map();
 
-  for  (let course of past) {
+  for (let course of past) {
     if (courseGrade.has(course.course_id)) {
-      courseGrade.set(course.course_id, {credits: course.credits, grade: Math.max(courseGrade.get(course.course_id).grade, course.grade)});
-    }
-    else {
-      courseGrade.set(course.course_id, {credits: course.credits, grade: course.grade});
+      courseGrade.set(course.course_id, {
+        credits: course.credits,
+        grade: Math.max(courseGrade.get(course.course_id).grade, course.grade),
+      });
+    } else {
+      courseGrade.set(course.course_id, {
+        credits: course.credits,
+        grade: course.grade,
+      });
     }
   }
 
@@ -279,7 +292,7 @@ export async function getEnrollments(student_id) {
       qualityPoints += grade * credits;
     }
   }
-  
+
   const gpa = function () {
     switch (totalCredits) {
       case 0:
@@ -289,13 +302,22 @@ export async function getEnrollments(student_id) {
     }
   };
 
-  return {current: current, past: past, future: future, gpa: gpa()};
+  return { current: current, past: past, future: future, gpa: gpa() };
 }
 
 // add a new field for a student with its requirements in JSON format
 // accepts student_id, name, type, year, quarter, ud_credits, total_credits, and requirements as parameters
 // returns true if the field was added successfully
-export async function addStudentField(student_id, name, type, year, quarter, ud_credits, total_credits, requirements) {
+export async function addStudentField(
+  student_id,
+  name,
+  type,
+  year,
+  quarter,
+  ud_credits,
+  total_credits,
+  requirements
+) {
   try {
     await pool.query(
       `
@@ -303,18 +325,17 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
-        student_id, 
-        name, 
-        type, 
-        year, 
-        typeof quarter === "string" ? quarter.toLowerCase() : null, 
-        ud_credits, 
-        total_credits, 
-        requirements
+        student_id,
+        name,
+        type,
+        year,
+        typeof quarter === "string" ? quarter.toLowerCase() : null,
+        ud_credits,
+        total_credits,
+        requirements,
       ]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return false;
   }
@@ -324,7 +345,13 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
 // delete a field for a student
 // accepts student_id, name, type, year, and quarter as parameters
 // returns true if the field was deleted successfully
-export async function deleteStudentField(student_id, name, type, year, quarter) {
+export async function deleteStudentField(
+  student_id,
+  name,
+  type,
+  year,
+  quarter
+) {
   try {
     await pool.query(
       `
@@ -332,15 +359,14 @@ export async function deleteStudentField(student_id, name, type, year, quarter) 
         WHERE student_id = ? AND name = ? AND type = ? AND year = ? AND quarter = ?
       `,
       [
-        student_id, 
-        name, 
-        type, 
-        year, 
-        typeof quarter === "string" ? quarter.toLowerCase() : null
+        student_id,
+        name,
+        type,
+        year,
+        typeof quarter === "string" ? quarter.toLowerCase() : null,
       ]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return false;
   }
