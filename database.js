@@ -112,7 +112,7 @@ export async function getUser(email) {
 // accepts student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, and enrollments parameters
 // enrollments is an array of objects with course_id, year, quarter, grade, and credits properties
 // returns -1 if no enrollments were added, otherwise returns an array of failed enrollments
-export async function addEnrollments(student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, enrollments) {
+export async function addEnrollments({ student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, enrollments }) {
   try {
     await pool.query(
       `
