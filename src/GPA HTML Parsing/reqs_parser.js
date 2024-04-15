@@ -20,14 +20,19 @@ export const reqsParse = (input) => {
   output[`field_name`] = fName;
   if (fName.includes("Minor")) {
     output[`field_type`] = "Minor";
-  } else if ((fName.includes("Certification") && !fName.includes("Education")) || 
-             (fName.includes("Pre-") && !fName.includes("Social")) || 
-              fName.includes("University Scholars")) {
+  } else if (
+    (fName.includes("Certification") && !fName.includes("Education")) ||
+    (fName.includes("Pre-") && !fName.includes("Social")) ||
+    fName.includes("University Scholars")
+  ) {
     output[`field_type`] = "Program";
   } else {
     output[`field_type`] = "Major";
   }
-  output[`year`] = field.slice(field.lastIndexOf("Catalog") - 8,field.indexOf("Catalog") - 1); // Catalog year
+  output[`year`] = field.slice(
+    field.lastIndexOf("Catalog") - 8,
+    field.indexOf("Catalog") - 1
+  ); // Catalog year
   let field_credits = $("div.heading").find("i").text().split(" ");
   output[`credits`] = Number(field_credits[0].slice(1)); // Total credits required
   output[`UD_credits`] = Number(field_credits[3]); // Upper Division credits required
@@ -47,7 +52,10 @@ export const reqsParse = (input) => {
   $("table.degReqTBL:first")
     .find("tr")
     .each((index, element) => {
-      let titleRow = $(element).find('b[style="font-size:16px;"]').text().trim(); // Checks for section title formatting
+      let titleRow = $(element)
+        .find('b[style="font-size:16px;"]')
+        .text()
+        .trim(); // Checks for section title formatting
       if (titleRow != "") {
         // If section title found:
         if (req[`section_title`] != "") {
@@ -60,7 +68,8 @@ export const reqsParse = (input) => {
         req[`section_title`] = title;
         req[`credits_required`] = 0;
         req[`classes`] = [];
-      } else if ( // Otherwise, check the row for degReqRow classes
+      } else if (
+        // Otherwise, check the row for degReqRow classes
         $(element).hasClass("degReqRowA") ||
         $(element).hasClass("degReqRowB")
       ) {
@@ -68,7 +77,10 @@ export const reqsParse = (input) => {
           .children()
           .each((ind, elem) => {
             // Check for OR:
-            if($(elem).text().trim().startsWith("OR") && $(elem).text().trim().length == 2) {
+            if (
+              $(elem).text().trim().startsWith("OR") &&
+              $(elem).text().trim().length == 2
+            ) {
               is_or = true;
             }
             // If found, iterate through each child of the row (add cases if more info needed):
@@ -85,15 +97,18 @@ export const reqsParse = (input) => {
                 req[`credits_required`] += credits_required;
             }
           });
-        if (is_or) { // If this line was OR, continue, setting last_or to true and is_or to false.
+        if (is_or) {
+          // If this line was OR, continue, setting last_or to true and is_or to false.
           is_or = false;
           last_or = true;
-        } else if (last_or) { // If the last line was OR, add this group to the previous set of groups.
+        } else if (last_or) {
+          // If the last line was OR, add this group to the previous set of groups.
           groups = reqs.pop();
           groups.push(req);
           reqs.push(groups);
           last_or = false; // Also, reset last_or.
-        } else { // Otherwise, just push this requirement as a lone group.
+        } else {
+          // Otherwise, just push this requirement as a lone group.
           groups.push(req);
 
           reqs.push(groups);
@@ -115,11 +130,10 @@ export const reqsParse = (input) => {
   output[`requirements`] = reqs;
 
   //Write to JSON object
-  const json = JSON.stringify(output, null, 2);
+
   // Test Output
   // console.log(json);
-  return json;
-
+  return output;
 };
 
 export default reqsParse;
