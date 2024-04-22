@@ -1,7 +1,5 @@
 DROP SCHEMA IF EXISTS gpa;
-
 CREATE SCHEMA IF NOT EXISTS gpa;
-
 USE gpa;
 
 CREATE TABLE IF NOT EXISTS counselor (
@@ -21,7 +19,6 @@ first_name VARCHAR(35) NOT NULL,
 last_name VARCHAR(35) NOT NULL,
 email VARCHAR(254) NOT NULL UNIQUE,
 counselor_id TINYINT UNSIGNED,
-class_standing ENUM('undergraduate', 'post-baccalaureate', 'graduate', 'doctoral') NOT NULL,
 enrollment_year YEAR,
 enrollment_quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 graduation_year YEAR,
@@ -67,7 +64,6 @@ section_id SMALLINT UNSIGNED,
 course_id VARCHAR(15) NOT NULL,
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
-topic TINYTEXT,
 classes JSON,
 location TINYTEXT,
 instructor TINYTEXT,
