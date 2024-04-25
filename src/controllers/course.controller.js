@@ -22,6 +22,7 @@ export async function parseAndUpload(req, res) {
 
   let parsedCourses = courseParse(file.path);
   let parsedRequirements = reqsParse(file.path);
+  let failedEnrollments = [];
 
   // Currently, we need to pass in a student_id, graduation_year, and graduation_quarter that are not being parsed correctly
   parsedCourses.student_id = req.body.student_id;
@@ -46,7 +47,7 @@ export async function parseAndUpload(req, res) {
 
   try {
     // once destructured, we can pass the values into the addEnrollments function
-    await addEnrollments(
+    failedEnrollments = await addEnrollments(
       student_id,
       enrollment_year,
       enrollment_quarter,
@@ -75,6 +76,12 @@ export async function parseAndUpload(req, res) {
       credits,
       JSON.stringify(requirements)
     );
+
+    if(!res) {
+      return res.status(500).send({
+        error: "There was an error uploading your data to the database."
+      });
+    }
   } catch (error) {
     return res.status(500).send({
       error: "There was an issue uploading your data to the database.",
@@ -85,6 +92,6 @@ export async function parseAndUpload(req, res) {
   const response = {};
   let majorRequirements = parsedRequirements.requirements;
   response.msg = "Courses parsed successfully";
-  response.data = { parsedCourses, majorRequirements };
+  response.data = { parsedCourses, majorRequirements, failedEnrollments };
   res.status(200).send(response);
 }
