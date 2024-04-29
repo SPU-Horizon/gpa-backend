@@ -123,13 +123,12 @@ export async function registerUser(first_name, last_name, email) {
       `,
       [first_name, last_name, email]
     );
-  
+
     return result.insertId;
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return null;
-  }  
+  }
 }
 
 // get a user's information
@@ -162,8 +161,7 @@ export async function getUser(email) {
     user.fields = fields;
 
     return user;
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return null;
   }
@@ -203,8 +201,7 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
         student_id
       ]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
   }
 
@@ -218,16 +215,17 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
             VALUES (?, ?, ?, ?, ?, ?)
         `,
         [
-          student_id, 
-          enrollment.course_id, 
-          enrollment.year, 
-          typeof enrollment.quarter === "string" ? enrollment.quarter.toLowerCase() : null, 
-          enrollment.grade, 
-          enrollment.credits
+          student_id,
+          enrollment.course_id,
+          enrollment.year,
+          typeof enrollment.quarter === "string"
+            ? enrollment.quarter.toLowerCase()
+            : null,
+          enrollment.grade,
+          enrollment.credits,
         ]
       );
-    }
-    catch (error) {
+    } catch (error) {
       failedEnrollments.push(enrollment);
     }
   }
@@ -290,7 +288,7 @@ export async function getEnrollments(student_id) {
 
   let courseGrade = new Map();
 
-  for  (let course of past) {
+  for (let course of past) {
     if (courseGrade.has(course.course_id)) {
       courseGrade.set(course.course_id, {credits: course.credits, grade: Math.max(courseGrade.get(course.course_id).grade, points_grade(course.grade))});
     }
@@ -370,16 +368,17 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
-        student_id, 
-        name, 
-        type, 
-        year, 
-        typeof quarter === "string" ? quarter.toLowerCase() : null, 
-        ud_credits, 
-        total_credits, 
-        requirements
+        student_id,
+        name,
+        type,
+        year,
+        typeof quarter === "string" ? quarter.toLowerCase() : null,
+        ud_credits,
+        total_credits,
+        requirements,
       ]
     );
+    
     [duplicate_fields] = await pool.query(
       `
       SELECT student_field_id, name, type, year, quarter
@@ -408,8 +407,7 @@ export async function deleteStudentField(student_field_id) {
       `,
       [student_field_id]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return false;
   }
