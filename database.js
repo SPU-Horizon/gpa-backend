@@ -419,7 +419,7 @@ export async function deleteStudentField(student_field_id) {
 // create a plan for a student
 // accepts max_credits_per_quarter, mandatory_courses, completed_courses, and completed_credits as parameters
 // returns a plan for the student in the type of an array of objects with properties year, quarter, credits, and classes
-export async function createPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits) {
+export async function createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits) {
   let course_details = new Map();
   ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100']. forEach(course => {if (!completed_courses.has(course)) {mandatory_courses.add(course)}});
   let curr_prerequisites = new Set(mandatory_courses.values());
@@ -548,7 +548,7 @@ export async function createPlan(max_credits_per_quarter, mandatory_courses, com
       }
     }
 
-    for (let index = earliest_quarter; true; index++) {
+    for (let index = earliest_quarter; index < 4; index++) {
       if (final_plan.length < index + 1) {
         (current_quarter, current_year) = quarter_increment(final_plan[index - 1].quarter, final_plan[index - 1].year);
         final_plan.push({
@@ -573,8 +573,29 @@ export async function createPlan(max_credits_per_quarter, mandatory_courses, com
             future_completed_credits[i] += course_details.get(courseCode).credits;
           }
         }
+        break;
       }
     }
   }
   return final_plan;
+}
+
+// save a student's plan
+// accepts student_id, plan_name, selected_fields, max_credits, and plan parameters
+// returns 0 if the plan was saved successfully, otherwise returns -1
+export async function saveStudentPlan (student_id, plan_name, selected_fields, max_credits, plan) {
+  try {
+    await pool.query(
+      `
+      INSERT INTO plan (student_id, plan_name, selected_fields, max_credits, plan)
+      VALUES (?, ?, ?, ?, ?)
+      `,
+      [student_id, plan_name, selected_fields, max_credits, plan]
+    );
+  }
+  catch (error) {
+    console.log(error);
+    return -1;
+  }
+  return 0;
 }

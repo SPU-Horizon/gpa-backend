@@ -86,9 +86,9 @@ FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE RESTRICT ON UPDA
 CREATE TABLE IF NOT EXISTS student_plan (
 plan_id MEDIUMINT UNSIGNED AUTO_INCREMENT,
 student_id SMALLINT UNSIGNED,
-name VARCHAR(254),
+plan_name VARCHAR(254),
 max_credits TINYINT UNSIGNED,
-fields JSON,
+selected_fields JSON,
 plan JSON,
 date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 PRIMARY KEY (plan_id),
