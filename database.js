@@ -86,13 +86,13 @@ let points_grade = function (letter_grade) {
 let quarter_increment = function (quarter, year) {
   switch(quarter) {
     case "winter":
-      return ("spring", year);
+      return ["spring", year];
     case "spring":
-      return ("autumn", year);
+      return ["autumn", year];
     case "summer":
-      return ("autumn", year);
+      return ["autumn", year];
     case "autumn":
-      return ("winter", year + 1);
+      return ["winter", year + 1];
   };
 };
 
@@ -425,7 +425,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
   let curr_prerequisites = new Set(mandatory_courses.values());
   let prerequisites_tuples = [];
   let current_year, current_quarter, curr_standing, available_sections;
-  (current_quarter, current_year) = quarter_increment(currentQuarter(), currentYear);
+  [current_quarter, current_year] = quarter_increment(currentQuarter(), currentYear);
   let course_planned_quarter = new Map();
   let course_prerequisites = new Map();
   let final_plan = [{
@@ -534,7 +534,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
 
   for (let course of sorted_courses) {
     let curr_course = course_details.get(course);
-    (current_quarter, current_year) = quarter_increment(currentQuarter(), currentYear);
+    [current_quarter, current_year] = quarter_increment(currentQuarter(), currentYear);
     let earliest_quarter = 0;
 
     for (let prerequisite of course_prerequisites.get(course)) {
@@ -550,7 +550,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
 
     for (let index = earliest_quarter; index < 4; index++) {
       if (final_plan.length < index + 1) {
-        (current_quarter, current_year) = quarter_increment(final_plan[index - 1].quarter, final_plan[index - 1].year);
+        [current_quarter, current_year] = quarter_increment(final_plan[index - 1].quarter, final_plan[index - 1].year);
         final_plan.push({
           year: current_year,
           quarter: current_quarter,
