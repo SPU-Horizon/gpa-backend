@@ -330,7 +330,7 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
       `
         SELECT course_id, name, credits
         FROM course
-        WHERE course_id IN ?
+        WHERE course_id IN (?)
       `,
       [courses_set.values()]);
   }
@@ -446,7 +446,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
         `
         SELECT course_id, name, credits, attributes, standing, prerequisites, corequisites
         FROM course
-        WHERE course_id IN ?
+        WHERE course_id IN (?)
         `,
         [curr_prerequisites.values()]
       );
