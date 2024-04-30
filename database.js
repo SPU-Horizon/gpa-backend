@@ -241,7 +241,7 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
 // future is an array of courses the student is registered to take in a later quarter
 // gpa is the student's 4.0 grade point average
 export async function getEnrollments(student_id) {
-  let past, current, future, completed_credits;
+  let past, current, future, completed_credits = 0;
   try {
     [future] = await pool.query(
       `
@@ -271,15 +271,6 @@ export async function getEnrollments(student_id) {
       `,
       [student_id]
     );
-
-    completed_credits = await pool.query(
-      `
-      SELECT SUM(credits) AS completed_credits
-      FROM enrollment
-      WHERE student_id = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
-      `,
-      [student_id]
-    )[0][0].completed_credits;
   }
   catch (error) {
     console.log(error);
@@ -289,6 +280,7 @@ export async function getEnrollments(student_id) {
   let courseGrade = new Map();
 
   for (let course of past) {
+    completed_credits += course.credits;
     if (courseGrade.has(course.course_id)) {
       courseGrade.set(course.course_id, {credits: course.credits, grade: Math.max(courseGrade.get(course.course_id).grade, points_grade(course.grade))});
     }
@@ -547,6 +539,10 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
     }
 
     for (let index = earliest_quarter; index < 4; index++) {
+      // let canBeScheduled = function () {
+      //   available_sections.find(section => section.course_id == course && section.year == final_plan[index].year && section.quarter == final_plan[index].quarter)
+      // }
+
       if (final_plan.length < index + 1) {
         [current_quarter, current_year] = quarter_increment(final_plan[index - 1].quarter, final_plan[index - 1].year);
         final_plan.push({
