@@ -563,9 +563,16 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
       if (course_details.get(course).standing.contains(curr_standing)
       && final_plan[index].credits + curr_course.credits <= max_credits_per_quarter
       && available_sections.find(section => section.course_id == course && section.year == final_plan[index].year && section.quarter == final_plan[index].quarter)) {
-        for (let courseCode of curr_course.corequisites.append(course)) {
+        let course_and_corequisites = curr_course.corequisites;
+        course_and_corequisites.append(course);
+        for (let courseCode of course_and_corequisites) {
+          let tempCourse = course_details.get(courseCode);
+          tempCourse.prerequisites = [];
+          for (let prerequisite_course of course_prerequisites.get(courseCode)) {
+            tempCourse.prerequisites.push(course_details.get(prerequisite_course));
+          }
+          final_plan[index].classes.push(tempCourse);
           final_plan[index].credits += course_details.get(courseCode).credits;
-          final_plan[index].classes.push(courseCode); // Add section information
           course_planned_quarter.set(courseCode, index);
           for (let i = index + 1; i < future_completed_credits.length - index - 1; i++) {
             future_completed_credits[i] += course_details.get(courseCode).credits;
