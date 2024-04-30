@@ -332,7 +332,7 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
         FROM course
         WHERE course_id IN ?
       `,
-      courses_set.values());
+      [courses_set.values()]);
   }
   catch (error) {
     console.log(error);
@@ -448,7 +448,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
         FROM course
         WHERE course_id IN ?
         `,
-        curr_prerequisites.values()
+        [curr_prerequisites.values()]
       );
     }
     catch (error) {
