@@ -335,7 +335,16 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
     }
     else {
       let courses_set = new Set();
+      let course_details = new Map();
       let all_courses_details;
+
+      for (let requirement of requirements) {
+        for (let option of requirement) {
+          for (let course of option.courses) {
+            courses_set.add(course);
+          }
+        }
+      }
 
       [all_courses_details] = await pool.query(
         `
@@ -345,8 +354,6 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
         `,
         [Array.from(courses_set)]
       );
-        
-      let course_details = new Map();
 
       for (let course of all_courses_details) {
         course_details.set(course.course_id, course);
