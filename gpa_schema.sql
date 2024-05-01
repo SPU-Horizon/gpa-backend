@@ -1,7 +1,5 @@
 DROP SCHEMA IF EXISTS gpa;
-
 CREATE SCHEMA IF NOT EXISTS gpa;
-
 USE gpa;
 
 CREATE TABLE IF NOT EXISTS counselor (
@@ -30,6 +28,7 @@ FOREIGN KEY (counselor_id) REFERENCES counselor (counselor_id) ON DELETE SET NUL
 );
 
 CREATE TABLE IF NOT EXISTS student_field (
+student_field_id SMALLINT UNSIGNED AUTO_INCREMENT UNIQUE,
 student_id SMALLINT UNSIGNED,
 name VARCHAR(72),
 type ENUM('major', 'minor', 'program'),
@@ -65,7 +64,6 @@ section_id SMALLINT UNSIGNED,
 course_id VARCHAR(15) NOT NULL,
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
-topic TINYTEXT,
 classes JSON,
 location TINYTEXT,
 instructor TINYTEXT,
@@ -78,7 +76,7 @@ student_id SMALLINT UNSIGNED,
 course_id VARCHAR(15),
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
-grade DECIMAL(2, 1),
+grade VARCHAR(4),
 credits DECIMAL(2, 1),
 PRIMARY KEY (student_id, course_id, year, quarter),
 FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -88,9 +86,9 @@ FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE RESTRICT ON UPDA
 CREATE TABLE IF NOT EXISTS student_plan (
 plan_id MEDIUMINT UNSIGNED AUTO_INCREMENT,
 student_id SMALLINT UNSIGNED,
-name VARCHAR(254),
+plan_name VARCHAR(254),
 max_credits TINYINT UNSIGNED,
-fields JSON,
+selected_fields JSON,
 plan JSON,
 date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 PRIMARY KEY (plan_id),

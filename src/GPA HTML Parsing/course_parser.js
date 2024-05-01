@@ -60,6 +60,7 @@ export const courseParse = (input) => {
     advisorList[i] = advisor;
   }
   output[`advisors`] = advisorList;
+  output[`counselor`] = output[`UAC`];
 
   //Get majors/minors
   const majorList = [];

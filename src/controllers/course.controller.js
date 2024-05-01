@@ -42,6 +42,7 @@ export async function parseAndUpload(req, res) {
     enrollment_quarter,
     graduation_year,
     graduation_quarter,
+    counselor,
     enrollments,
   } = parsedCourses;
 
@@ -53,6 +54,7 @@ export async function parseAndUpload(req, res) {
       enrollment_quarter,
       graduation_year,
       graduation_quarter,
+      counselor,
       enrollments
     );
   } catch (error) {
@@ -66,7 +68,7 @@ export async function parseAndUpload(req, res) {
 
   try {
     // once destructured, we can pass the values into the addEnrollments function
-    await addStudentField(
+    let duplicate_fields = await addStudentField(
       student_id,
       field_name,
       field_type,
@@ -74,12 +76,12 @@ export async function parseAndUpload(req, res) {
       enrollment_quarter,
       UD_credits,
       credits,
-      JSON.stringify(requirements)
+      requirements
     );
 
-    if(!res) {
+    if (!duplicate_fields) {
       return res.status(500).send({
-        error: "There was an error uploading your data to the database."
+        error: "There was an error uploading your data to the database.",
       });
     }
   } catch (error) {
