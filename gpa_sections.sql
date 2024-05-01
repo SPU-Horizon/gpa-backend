@@ -1,3 +1,4 @@
+-- Keep in mind these sections are for 2024 courses
 INSERT INTO section (section_id, course_id, year, quarter, classes, location, instructor)
 VALUES
 (87, 'ACCT 2361', '2024', 'autumn', '[{"weekday": "Tu", "start_time": "9:00AM", "end_time": "11:00 AM"}, {"weekday": "Th", "start_time": "9:00AM", "end_time": "11:00 AM"}]', 'McKenna Hall 118', "Charlotte Qu"),
