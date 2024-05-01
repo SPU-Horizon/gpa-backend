@@ -312,79 +312,93 @@ export async function getEnrollments(student_id) {
 
 // add a new field for a student with its requirements in JSON format
 // accepts student_id, name, type, year, quarter, ud_credits, total_credits, and requirements as parameters
-// returns true if the field was added successfully
+// returns an array with status code and string message
 export async function addStudentField(student_id, name, type, year, quarter, ud_credits, total_credits, requirements) {
-  let courses_set = new Set();
-  let duplicate_fields, all_courses_details;
-
-  for (let group of requirements) {
-    for (let option of group) {
-      for (let course of option.courses) {
-        courses_set.add(course);
-      }
-    }
-  }
-
   try {
-    [all_courses_details] = await pool.query(
+    let [rows] = await pool.query(
       `
-        SELECT course_id, name, credits
-        FROM course
-        WHERE course_id IN (?)
-      `,
-      [Array.from(courses_set)]);
-  }
-  catch (error) {
-    console.log(error);
-    return -1;
-  }
-  
-  let course_details = new Map();
-
-  for (let course of all_courses_details) {
-    course_details.set(course.course_id, course);
-  }
-
-  for (let group of requirements) {
-    for (let option of group) {
-      for (let course of option.courses) {
-        course = course_details.get(course);
-      }
-    }
-  }
-
-  try {
-    await pool.query(
-      `
-        INSERT INTO student_field (student_id, name, type, year, quarter, ud_credits, total_credits, requirements)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      SELECT student_field_id
+      FROM student_field
+      WHERE student_id = ? AND name = ? AND type = ? AND year = ? AND quarter = ?
       `,
       [
         student_id,
         name,
-        type,
+        type.toLowerCase(),
         year,
-        typeof quarter === "string" ? quarter.toLowerCase() : null,
-        ud_credits,
-        total_credits,
-        requirements,
+        quarter.toLowerCase()
       ]
     );
-    
-    [duplicate_fields] = await pool.query(
-      `
-      SELECT student_field_id, name, type, year, quarter
-      FROM student_field
-      WHERE student_id = ? AND name = ? AND type = ?
-      `,
-      [student_id, name, type]
-    );      
+
+    if (rows.length > 0) {
+      return [1, "The uploaded field already exists."];
+    }
+    else {
+      let courses_set = new Set();
+      let all_courses_details;
+
+      [all_courses_details] = await pool.query(
+        `
+        SELECT course_id, name, credits
+        FROM course
+        WHERE course_id IN (?)
+        `,
+        [Array.from(courses_set)]
+      );
+        
+      let course_details = new Map();
+
+      for (let course of all_courses_details) {
+        course_details.set(course.course_id, course);
+      }
+
+      for (let group of requirements) {
+        for (let option of group) {
+          for (let course of option.courses) {
+            course = course_details.get(course);
+          }
+        }
+      }
+
+      await pool.query(
+        `
+        INSERT INTO student_field (student_id, name, type, year, quarter, ud_credits, total_credits, requirements)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+          student_id,
+          name,
+          type,
+          year,
+          quarter.toLowerCase(),
+          ud_credits,
+          total_credits,
+          JSON.stringify(requirements),
+        ]
+      );
+
+      let [similar_fields] = await pool.query(
+        `
+        SELECT student_field_id
+        FROM student_field
+        WHERE student_id = ? AND name = ? AND type = ?
+        `,
+        [
+          student_id,
+          name,
+          type.toLowerCase()
+        ]
+      );
+
+      return similar_fields.length > 1 ?
+        [1, "The uploaded field was saved succesfully, but there are other saved fields with the same name and type. The graduation requirements for the same field may have been uploaded for a different admit term."] :
+        [0, "The uploaded field was saved successfully."];
+    }
   }
   catch (error) {
     console.log(error);
-    return [];
+    return [-1, "The operation could not be completed. Please try again later."];
   }
-  return duplicate_fields;
 }
 
 // delete a field for a student
