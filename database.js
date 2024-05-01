@@ -602,6 +602,29 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
   return final_plan;
 }
 
+// get a student's plan
+// accepts student_id as parameter
+// returns an array of objects with properties plan_id, plan_name, selected_fields, max_credits, plan, and date_created
+// returns -1 if there was an error retrieving the student's plans
+export  async function getStudentPlan(student_id) {
+  try {
+    let [plans] = await pool.query(
+      `
+      SELECT plan_id, plan_name, selected_fields, max_credits, plan, date_created
+      FROM student_plan
+      WHERE student_id = ?
+      `,
+      [student_id]
+    );
+  }
+  catch (error) {
+    console.log(error);
+    return -1;
+  }
+
+  return plans;
+}
+
 // save a student's plan
 // accepts student_id, plan_name, selected_fields, max_credits, and plan parameters
 // returns 0 if the plan was saved successfully, otherwise returns -1
