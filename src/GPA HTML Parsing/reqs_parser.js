@@ -45,7 +45,7 @@ export const reqsParse = (input) => {
   var title = "";
   req[`section_title`] = ""; // Title text for the section containing this group
   req[`credits_required`] = 0; // Credits required for this group
-  req[`classes`] = []; // List of classes in the group
+  req[`courses`] = []; // List of classes in the group
   var is_or = false; // boolean for if this line is OR
   var last_or = false; // boolean for if last line was OR
 
@@ -67,7 +67,7 @@ export const reqsParse = (input) => {
         title = titleRow;
         req[`section_title`] = title;
         req[`credits_required`] = 0;
-        req[`classes`] = [];
+        req[`courses`] = [];
       } else if (
         // Otherwise, check the row for degReqRow classes
         $(element).hasClass("degReqRowA") ||
@@ -89,7 +89,7 @@ export const reqsParse = (input) => {
                 $(elem)
                   .find("table")
                   .each((i, e) => {
-                    req[`classes`].push($(e).text().trim().split(" ")[0]); // invisible split character is &nbsp; or U+00a0
+                    req[`courses`].push($(e).text().trim().split(" ")[0]); // invisible split character is &nbsp; or U+00a0
                   });
               case 1: // From the second, grab the credits required.
                 let credits_required = parseInt($(elem).text().trim());
@@ -117,7 +117,7 @@ export const reqsParse = (input) => {
         req = {};
         req[`section_title`] = title;
         req[`credits_required`] = 0;
-        req[`classes`] = [];
+        req[`courses`] = [];
       }
     });
   if (last_or) {
