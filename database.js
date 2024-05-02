@@ -432,7 +432,7 @@ export async function deleteStudentField(student_field_id) {
 // returns a plan for the student in the type of an array of objects with properties year, quarter, credits, and classes
 export async function createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits) {
   let course_details = new Map();
-  ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100']. forEach(course => {if (!completed_courses.has(course)) {mandatory_courses.add(course)}});
+  ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'].forEach(course => {if (!completed_courses.has(course)) {mandatory_courses.add(course)}});
   let curr_prerequisites = new Set(mandatory_courses.values());
   let prerequisites_tuples = [];
   let current_year, current_quarter, curr_standing, available_sections;
