@@ -280,7 +280,7 @@ export async function getEnrollments(student_id) {
   let courseGrade = new Map();
 
   for (let course of past) {
-    completed_credits += course.credits;
+    completed_credits += parseInt(course.credits);
     if (courseGrade.has(course.course_id)) {
       courseGrade.set(course.course_id, {credits: course.credits, grade: Math.max(courseGrade.get(course.course_id).grade, points_grade(course.grade))});
     }
