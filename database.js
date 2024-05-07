@@ -334,35 +334,49 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
       return [1, "The uploaded field already exists."];
     }
     else {
-      let courses_set = new Set();
+      let all_courses = new Set();
       let course_details = new Map();
-      let all_courses_details;
 
       for (let requirement of requirements) {
         for (let option of requirement) {
           for (let course of option.courses) {
-            courses_set.add(course);
+            all_courses.add(course);
           }
         }
       }
 
-      [all_courses_details] = await pool.query(
+      let [rows] = await pool.query(
         `
         SELECT course_id, name, credits
         FROM course
         WHERE course_id IN (?)
         `,
-        [Array.from(courses_set)]
+        [Array.from(all_courses)]
       );
 
-      for (let course of all_courses_details) {
+      for (let course of rows) {
         course_details.set(course.course_id, course);
       }
 
-      for (let group of requirements) {
-        for (let option of group) {
-          for (let course of option.courses) {
-            course = course_details.get(course);
+      for (let groupIndex = 0; groupIndex < requirements.length; groupIndex++) {
+        for (let optionIndex = 0; optionIndex < requirements[groupIndex].length; optionIndex++) {
+          for (let courseIndex = 0; courseIndex < requirements[groupIndex][optionIndex].courses.length; courseIndex++) {
+            let curr_course = requirements[groupIndex][optionIndex].courses[courseIndex];
+
+            if (course_details.get(curr_course) != undefined) {
+              requirements[groupIndex][optionIndex].courses[courseIndex] = {
+                course_id: curr_course,
+                name: course_details.get(curr_course).name,
+                credits: course_details.get(curr_course).credits
+              };
+             }
+             else {
+              requirements[groupIndex][optionIndex].courses[courseIndex] = {
+                course_id: curr_course,
+                name: "Course not found",
+                credits: 0
+              };
+            }
           }
         }
       }

@@ -51,6 +51,7 @@ standing SET('freshman', 'sophomore', 'junior', 'senior', 'post-baccalaureate', 
 restrictions JSON,
 prerequisites JSON,
 corequisites JSON,
+has_prerequisite_exam BOOL DEFAULT FALSE,
 approval_required BOOL DEFAULT FALSE,
 last_offered YEAR,
 recurrence_year ENUM('yearly', 'biyearly', 'occasionally'),
@@ -94,12 +95,3 @@ date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 PRIMARY KEY (plan_id),
 FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
--- CREATE TRIGGER course_recurrence
--- AFTER INSERT ON section
--- FOR EACH ROW
--- BEGIN
--- IF 
--- THEN 
--- ENDIF
--- END;
