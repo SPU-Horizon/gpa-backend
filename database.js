@@ -444,9 +444,20 @@ export async function deleteStudentField(student_field_id) {
 // create a plan for a student
 // accepts max_credits_per_quarter, mandatory_courses, completed_courses, and completed_credits as parameters
 // returns a plan for the student in the type of an array of objects with properties year, quarter, credits, and classes
+// Temporary function to create a plan for a student
 export async function createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits) {
   let course_details = new Map();
-  ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'].forEach(course => {if (!completed_courses.has(course)) {mandatory_courses.add(course)}});
+
+  // console.log('Max credits in createStudentPlan from database.js:', max_credits_per_quarter);
+  // console.log('Completed credits in createStudentPlan from database.js:', completed_credits);
+  // console.log('Completed courses in createStudentPlan from database.js:', [...completed_courses]);
+  // console.log('Mandatory courses in createStudentPlan from database.js:', [...mandatory_courses]);
+
+  ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'].forEach(course => {
+    if (!completed_courses.has(course)) {
+      mandatory_courses.add(course);
+    }
+  });
   let curr_prerequisites = new Set(mandatory_courses.values());
   let prerequisites_tuples = [];
   let current_year, current_quarter, curr_standing, available_sections;
@@ -468,8 +479,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
       WHERE year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}")
       `
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return -1;
   }
@@ -485,8 +495,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
         `,
         [Array.from(curr_prerequisites)]
       );
-    }
-    catch (error) {
+    } catch (error) {
       console.log(error);
       return -1;
     }
@@ -496,88 +505,112 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
     for (let course of courses) {
       let prerequisite_options = [];
       let prerequisites_met = false;
-      let min_credits_remaining =  Number.MAX_SAFE_INTEGER;
-      let min_courses_remaining = Number.MAX_SAFE_INTEGER;
-      let index_of_min = 0;
 
       course_details.set(course.course_id, course);
 
-      for (let i = 0; i < course.prerequisites.length; i++) {
-        let credits_remaining = 0;
-        let courses_remaining = 0;
-        let prerequisite_tuples = [];
-        let incomplete_prerequisites = [];
+      if (course.prerequisites && course.prerequisites.length > 0) {
+        for (let i = 0; i < course.prerequisites.length; i++) {
+          let credits_remaining = 0;
+          let courses_remaining = 0;
+          let prerequisite_tuples = [];
+          let incomplete_prerequisites = [];
 
-        for (let prerequisite_course of course.prerequisites[i]) {
-          if (!completed_courses.has(prerequisite_course.course_id)) {
-            courses_remaining++;
-            credits_remaining += parseInt(prerequisite_course.credits);
-            prerequisite_tuples.push([prerequisite_course.course_id, course.course_id]);
-            incomplete_prerequisites.push(prerequisite_course.course_id);
+          for (let prerequisite_course of course.prerequisites[i]) {
+            if (!completed_courses.has(prerequisite_course.course_id)) {
+              courses_remaining++;
+              credits_remaining += parseInt(prerequisite_course.credits);
+              prerequisite_tuples.push([prerequisite_course.course_id, course.course_id]);
+              incomplete_prerequisites.push(prerequisite_course.course_id);
+            }
+          }
+
+          if (courses_remaining == 0) {
+            prerequisites_met = true;
+            break;
+          } else {
+            prerequisite_options.push({
+              courses_remaining: courses_remaining,
+              credits_remaining: credits_remaining,
+              prerequisite_tuples: prerequisite_tuples,
+              incomplete_prerequisites: incomplete_prerequisites
+            });
           }
         }
-
-        if (courses_remaining == 0) {
-          prerequisites_met = true;
-          break;
-        }
-        else {
-          prerequisite_options.push({courses_remaining: courses_remaining, credits_remaining: credits_remaining, prerequisite_tuples: prerequisite_tuples, incomplete_prerequisites: incomplete_prerequisites});
-        }
+      } else {
+        //no prerequisites means they are met
+        prerequisites_met = true;
       }
 
       if (prerequisites_met) {
-        continue
+        continue; // Skip further processing for this course
       }
 
+      let min_credits_remaining = Number.MAX_SAFE_INTEGER;
+      let min_courses_remaining = Number.MAX_SAFE_INTEGER;
+      let index_of_min = -1;
+
+      console.log('this is the minimum remaining:',min_courses_remaining);
+
+      console.log('Prerequisite options:', prerequisite_options);
       for (let i = 0; i < prerequisite_options.length; i++) {
-        if (prerequisite_options[i].credits_remaining < min_credits_remaining || (prerequisite_options[i].credits_remaining == min_credits_remaining && prerequisite_options[i].courses_remaining < min_courses_remaining)) {
+        if (prerequisite_options[i].credits_remaining < min_credits_remaining ||
+            (prerequisite_options[i].credits_remaining == min_credits_remaining &&
+             prerequisite_options[i].courses_remaining < min_courses_remaining)) {
           min_credits_remaining = prerequisite_options[i].credits_remaining;
           min_courses_remaining = prerequisite_options[i].courses_remaining;
           index_of_min = i;
         }
       }
 
-      prerequisite_options[index_of_min].incomplete_prerequisites.forEach(prerequisite => {curr_prerequisites.add(prerequisite)});
-      prerequisite_options[index_of_min].prerequisite_tuples.forEach(tuple => {prerequisites_tuples.push(tuple)});
+      if (index_of_min !== -1) {
+        prerequisite_options[index_of_min].incomplete_prerequisites.forEach(prerequisite => {
+          curr_prerequisites.add(prerequisite);
+        });
+        prerequisite_options[index_of_min].prerequisite_tuples.forEach(tuple => {
+          prerequisites_tuples.push(tuple);
+        });
+      }
     }
   }
 
   prerequisites_tuples.forEach(tuple => {
     if (course_prerequisites.has(tuple[1])) {
-      course_prerequisites.set(tuple[1], course_prerequisites.get(tuple[1]).push(tuple[0]));
-    }
-    else {
+      let currentPrereqs = course_prerequisites.get(tuple[1]);
+      currentPrereqs.push(tuple[0]);
+      course_prerequisites.set(tuple[1], currentPrereqs);
+    } else {
       course_prerequisites.set(tuple[1], [tuple[0]]);
     }
   });
 
   let sorted_courses = toposort(prerequisites_tuples);
 
+  console.log('Sorted courses:', sorted_courses);
+  console.log('Prerequisites:', course_prerequisites);
+
   let future_completed_credits = [];
   future_completed_credits.push(completed_credits);
+
+  console.log('Future completed credits:', future_completed_credits);
 
   for (let course of sorted_courses) {
     let curr_course = course_details.get(course);
     [current_quarter, current_year] = quarter_increment(currentQuarter(), currentYear);
     let earliest_quarter = 0;
 
-    for (let prerequisite of course_prerequisites.get(course)) {
-      if (course_planned_quarter.get(prerequisite) >= earliest_quarter) {
-        for (let prerequisiteObj of curr_course.prerequisites.flat()) {
-          if (prerequisiteObj.course_id == prerequisite) {
-            earliest_quarter = prerequisiteObj.concurrent_available ? course_planned_quarter.get(prerequisite) : course_planned_quarter.get(prerequisite) + 1;
-            break;
-          }
+    if (course_prerequisites.has(course)) {
+      for (let prerequisite of course_prerequisites.get(course)) {
+        let planned_quarter = course_planned_quarter.get(prerequisite);
+        if (planned_quarter >= earliest_quarter) {
+          earliest_quarter = planned_quarter + 1; // Ensure that courses are planned after their prerequisites
         }
       }
     }
 
-    for (let index = earliest_quarter; index < 4; index++) {
-      // let canBeScheduled = function () {
-      //   available_sections.find(section => section.course_id == course && section.year == final_plan[index].year && section.quarter == final_plan[index].quarter)
-      // }
+    console.log('Earliest quarter:', earliest_quarter);
+    console.log('final plan:', final_plan);
 
+    for (let index = earliest_quarter; index < 4; index++) {
       if (final_plan.length < index + 1) {
         [current_quarter, current_year] = quarter_increment(final_plan[index - 1].quarter, final_plan[index - 1].year);
         final_plan.push({
@@ -591,22 +624,26 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
 
       curr_standing = currStanding(future_completed_credits[index]);
 
-      if (course_details.get(course).standing.contains(curr_standing)
+      if (course_details.get(course).standing.includes(curr_standing)
       && final_plan[index].credits + curr_course.credits <= max_credits_per_quarter
       && available_sections.find(section => section.course_id == course && section.year == final_plan[index].year && section.quarter == final_plan[index].quarter)) {
-        let course_and_corequisites = curr_course.corequisites;
-        course_and_corequisites.append(course);
+        let course_and_corequisites = curr_course.corequisites || [];
+        course_and_corequisites.push(course);
+        console.log('Made it here::: Course and corequisites:', course_and_corequisites);
         for (let courseCode of course_and_corequisites) {
           let tempCourse = course_details.get(courseCode);
           tempCourse.prerequisites = [];
-          for (let prerequisite_course of course_prerequisites.get(courseCode)) {
-            tempCourse.prerequisites.push(course_details.get(prerequisite_course));
+          if (course_prerequisites.get(courseCode)) {
+            for (let prerequisite_course of course_prerequisites.get(courseCode)) {
+              tempCourse.prerequisites.push(course_details.get(prerequisite_course));
+            }
           }
+          console.log('Temp course:', tempCourse);
           final_plan[index].classes.push(tempCourse);
-          final_plan[index].credits += course_details.get(courseCode).credits;
+          final_plan[index].credits += tempCourse.credits;
           course_planned_quarter.set(courseCode, index);
-          for (let i = index + 1; i < future_completed_credits.length - index - 1; i++) {
-            future_completed_credits[i] += course_details.get(courseCode).credits;
+          for (let i = index + 1; i < future_completed_credits.length; i++) {
+            future_completed_credits[i] += tempCourse.credits;
           }
         }
         break;
