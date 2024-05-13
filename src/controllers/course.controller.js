@@ -15,25 +15,18 @@ export async function getClasses(req, res) {
   return;
 }
 
+
 // This will parse the courses from the html file and return
-export async function parseAndUpload(req, res) {
+export async function parseBanner(req, res) {
   // Access the file through req.file
   const file = req.file;
+  const option = req.query.option;
 
   let parsedCourses = courseParse(file.path);
-  let parsedRequirements = reqsParse(file.path);
   let failedEnrollments = [];
 
   // Currently, we need to pass in a student_id, graduation_year, and graduation_quarter that are not being parsed correctly
   parsedCourses.student_id = req.body.student_id;
-  parsedRequirements.student_id = req.body.student_id;
-
-  try {
-    await fs.unlink(file.path);
-    console.log("File removed successfully.");
-  } catch (error) {
-    console.error("Error removing file:", error);
-  }
 
   // Upload the parsed courses to the database, first destructuring the parsedCourses object
   const {
@@ -63,37 +56,65 @@ export async function parseAndUpload(req, res) {
     });
   }
 
-  const { field_name, field_type, year, UD_credits, credits, requirements } =
+  const response = {};
+
+
+  if(option == "field") { //If this option is selected then we add the students field and requirements along with the courses
+    console.log("field option selected");
+
+    let parsedRequirements = reqsParse(file.path);
+    parsedRequirements.student_id = req.body.student_id;
+
+    const { field_name, field_type, year, UD_credits, credits, requirements } =
     parsedRequirements;
 
-  try {
-    // once destructured, we can pass the values into the addEnrollments function
-    let duplicate_fields = await addStudentField(
-      student_id,
-      field_name,
-      field_type,
-      2022,
-      enrollment_quarter,
-      UD_credits,
-      credits,
-      requirements
-    );
+    try {
+      // once destructured, we can pass the values into the addEnrollments function
+      let duplicate_fields = await addStudentField(
+        student_id,
+        field_name,
+        field_type,
+        2022,
+        enrollment_quarter,
+        UD_credits,
+        credits,
+        requirements
+      );
 
-    if (!duplicate_fields) {
+      if (!duplicate_fields) {
+        return res.status(500).send({
+          error: "There was an error uploading your data to the database.",
+        });
+      }
+
+
+      
+    let majorRequirements = parsedRequirements.requirements;
+    response.msg = "Parsed successfully";
+    response.data = { parsedCourses, majorRequirements, failedEnrollments };
+
+    } catch (error) {
       return res.status(500).send({
-        error: "There was an error uploading your data to the database.",
+        error: "There was an issue uploading your data to the database.",
       });
     }
+
+   } else { //option is "courses"
+    console.log("courses option selected");
+
+    response.msg = "Parsed successfully";
+    response.data = { parsedCourses, failedEnrollments };
+   }
+
+
+
+  try {
+    await fs.unlink(file.path);
+    console.log("File removed successfully.");
   } catch (error) {
-    return res.status(500).send({
-      error: "There was an issue uploading your data to the database.",
-    });
+    console.error("Error removing file:", error);
   }
 
-  // Respond to the client
-  const response = {};
-  let majorRequirements = parsedRequirements.requirements;
-  response.msg = "Courses parsed successfully";
-  response.data = { parsedCourses, majorRequirements, failedEnrollments };
   res.status(200).send(response);
 }
+
