@@ -2,6 +2,7 @@ import {
   getEnrollments,
   addEnrollments,
   addStudentField,
+  deleteStudentField,
 } from "../../database.js";
 import courseParse from "../GPA HTML Parsing/course_parser.js";
 import reqsParse from "../GPA HTML Parsing/reqs_parser.js";
@@ -13,6 +14,19 @@ export async function getClasses(req, res) {
   const enrollments = await getEnrollments(req.query.id);
   res.send(enrollments);
   return;
+}
+
+export async function dropField(req, res) {
+  const { student_field_id } = req.body;
+
+  try {
+    const res = await deleteStudentField(student_field_id);
+    return res ? true : false;
+  } catch (error) {
+    return res.status(500).send({
+      error: "There was an issue deleting the field from the database.",
+    });
+  }
 }
 
 // This will parse the courses from the html file and return
