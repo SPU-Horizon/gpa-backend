@@ -111,6 +111,30 @@ export async function userExists(email) {
   return rows.length > 0;
 }
 
+// get array of student fields not found in the database
+// accepts student_id and parsedFields as parameters
+// returns an array of student fields that are not found in the database
+export async function getMissingFields (student_id, parsedFields) {
+  try {
+    let [student_fields] = await pool.query(
+      `
+      SELECT name
+      FROM student_field
+      WHERE student_id = ?
+      `,
+      [student_id]
+    );
+    // map the fields to their names
+    student_fields = student_fields.map((field) => field.name);
+
+    return parsedFields.filter(field => !student_fields.includes(field));
+  }
+  catch (error) {
+    console.log(error);
+    return [];
+  }
+}
+
 // register a new user
 // accepts first_name, last_name, and email parameters
 // returns the student_id of the newly registered user, otherwise returns null
