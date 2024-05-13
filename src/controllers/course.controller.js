@@ -20,8 +20,15 @@ export async function dropField(req, res) {
   const { student_field_id } = req.body;
 
   try {
-    const res = await deleteStudentField(student_field_id);
-    return res ? true : false;
+    const data = await deleteStudentField(student_field_id);
+
+    if (data) {
+      let data = { display_message: "Field deleted successfully." };
+      return res.status(200).send(data);
+    } else {
+      let data = { display_message: "Field deletion failed - try again." };
+      return res.status(500).send(data);
+    }
   } catch (error) {
     return res.status(500).send({
       error: "There was an issue deleting the field from the database.",
