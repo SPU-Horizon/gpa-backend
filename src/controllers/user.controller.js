@@ -7,6 +7,8 @@ export async function registerUserFunction(req, res) {
     res
       .status(500)
       .json({ message: "An error occurred while adding the student." });
+  } else if (studentId == null) {
+    res.status(409).json({ message: "Student already exists." });
   } else {
     res.status(201).json({ studentId });
   }
