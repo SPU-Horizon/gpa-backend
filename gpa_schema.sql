@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS course (
 course_id VARCHAR(15),
 name VARCHAR(104) NOT NULL,
 description TEXT,
-credits DECIMAL(2, 1),
+credits DECIMAL(3, 1),
 attributes SET('UD', 'FLC', 'W', 'CUE', 'HON', 'WKA', 'WKH', 'WKQR', 'WKAS', 'WKFS', 'WKSS', 'WE'),
 standing SET('freshman', 'sophomore', 'junior', 'senior', 'post-baccalaureate', 'graduate', 'doctoral'),
 restrictions JSON,

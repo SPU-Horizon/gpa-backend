@@ -2,6 +2,7 @@ import {
   getEnrollments,
   addEnrollments,
   addStudentField,
+  getMissingFields
 } from "../../database.js";
 import courseParse from "../GPA HTML Parsing/course_parser.js";
 import reqsParse from "../GPA HTML Parsing/reqs_parser.js";
@@ -24,6 +25,7 @@ export async function parseBanner(req, res) {
 
   let parsedCourses = courseParse(file.path);
   let failedEnrollments = [];
+  let missingFields = [];
 
   // Currently, we need to pass in a student_id, graduation_year, and graduation_quarter that are not being parsed correctly
   parsedCourses.student_id = req.body.student_id;
@@ -37,7 +39,11 @@ export async function parseBanner(req, res) {
     graduation_quarter,
     counselor,
     enrollments,
+    field
   } = parsedCourses;
+
+  // Call getMissingFields
+  missingFields = await getMissingFields(student_id, field);
 
   try {
     // once destructured, we can pass the values into the addEnrollments function
