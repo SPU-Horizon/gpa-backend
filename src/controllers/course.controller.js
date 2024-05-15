@@ -60,7 +60,6 @@ export async function parseBanner(req, res) {
 
 
   if(option == "field") { //If this option is selected then we add the students field and requirements along with the courses
-    console.log("field option selected");
 
     let parsedRequirements = reqsParse(file.path);
     parsedRequirements.student_id = req.body.student_id;
@@ -100,8 +99,6 @@ export async function parseBanner(req, res) {
     }
 
    } else { //option is "courses"
-    console.log("courses option selected");
-
     response.msg = "Parsed successfully";
     response.data = { parsedCourses, failedEnrollments };
    }
