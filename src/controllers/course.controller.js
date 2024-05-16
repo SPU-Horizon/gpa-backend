@@ -116,7 +116,7 @@ export async function parseBanner(req, res) {
       
     let majorRequirements = parsedRequirements.requirements;
     response.msg = "Parsed successfully";
-    response.data = { parsedCourses, majorRequirements, failedEnrollments };
+    response.data = { parsedCourses, majorRequirements, failedEnrollments, missingFields };
 
     } catch (error) {
       return res.status(500).send({
@@ -140,4 +140,3 @@ export async function parseBanner(req, res) {
 
   res.status(200).send(response);
 }
-
