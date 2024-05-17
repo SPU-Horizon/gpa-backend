@@ -73,15 +73,15 @@ FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE CASCADE ON UPDAT
 );
 
 CREATE TABLE IF NOT EXISTS enrollment (
+enrollment_id MEDIUMINT UNSIGNED AUTO_INCREMENT,
 student_id SMALLINT UNSIGNED,
 course_id VARCHAR(15),
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 grade VARCHAR(4),
 credits DECIMAL(2, 1),
-PRIMARY KEY (student_id, course_id, year, quarter),
+PRIMARY KEY (enrollment_id),
 FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (course_id) REFERENCES course (course_id) ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS student_plan (
