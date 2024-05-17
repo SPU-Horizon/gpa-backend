@@ -126,7 +126,7 @@ export async function getMissingFields (student_id, parsedFields) {
     );
     // map the fields to their names
     student_fields = student_fields.map((field) => field.name);
-
+    
     return parsedFields.filter(field => !student_fields.includes(field));
   }
   catch (error) {
@@ -271,7 +271,7 @@ export async function getEnrollments(student_id) {
       `
       SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
       FROM enrollment
-      INNER JOIN course ON enrollment.course_id = course.course_id
+      LEFT JOIN course ON enrollment.course_id = course.course_id
       WHERE enrollment.student_id = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}"))
       `,
       [student_id]
@@ -280,7 +280,7 @@ export async function getEnrollments(student_id) {
       `
       SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
       FROM enrollment
-      INNER JOIN course ON enrollment.course_id = course.course_id
+      LEFT JOIN course ON enrollment.course_id = course.course_id
       WHERE enrollment.student_id = ? AND year = ${currentYear} AND quarter = "${currentQuarter()}"
       `,
       [student_id]
@@ -290,7 +290,7 @@ export async function getEnrollments(student_id) {
       `
       SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter, grade
       FROM enrollment
-      INNER JOIN course ON enrollment.course_id = course.course_id
+      LEFT JOIN course ON enrollment.course_id = course.course_id
       WHERE enrollment.student_id = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
       `,
       [student_id]
@@ -304,7 +304,7 @@ export async function getEnrollments(student_id) {
   let courseGrade = new Map();
 
   for (let course of past) {
-    completed_credits += parseInt(course.credits);
+    course.credits == null ? pass : completed_credits += parseFloat(course.credits);
     if (courseGrade.has(course.course_id)) {
       courseGrade.set(course.course_id, {credits: course.credits, grade: Math.max(courseGrade.get(course.course_id).grade, points_grade(course.grade))});
     }
@@ -313,24 +313,22 @@ export async function getEnrollments(student_id) {
     }
   }
 
-  let qualityPoints = 0.0;
+  let qualityPoints = 0;
   let totalCredits = 0;
 
   for (let course of courseGrade.values()) {
-    if (!isNaN(course.grade) && !isNaN(course.credits)) {
-      let credits = parseInt(course.credits);
+    if (course.grade != null && course.credits != null) {
+      let credits = parseFloat(course.credits);
       let grade = parseFloat(course.grade);
       totalCredits += credits;
-      qualityPoints += (grade * credits);
+      qualityPoints += grade * credits;
     }
   }
   
-  let gpa = 0;
+  let gpa;
 
-  if (totalCredits != 0) {
-    gpa = qualityPoints / totalCredits;
-  }
-
+  totalCredits == 0 ? gpa = 0 : gpa = qualityPoints / totalCredits;
+  
   return {current: current, past: past, future: future, gpa: gpa, completed_credits: completed_credits};
 }
 
@@ -470,7 +468,7 @@ export async function deleteStudentField(student_field_id) {
 // returns a plan for the student in the type of an array of objects with properties year, quarter, credits, and classes
 export async function createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits) {
   let course_details = new Map();
-  ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'].forEach(course => {if (!completed_courses.has(course)) {mandatory_courses.add(course)}});
+  ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'].forEach(course => {if (!completed_courses.includes(course)) {mandatory_courses.push(course)}});
   let curr_prerequisites = new Set(mandatory_courses.values());
   let prerequisites_tuples = [];
   let current_year, current_quarter, curr_standing, available_sections;
@@ -526,6 +524,10 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
 
       course_details.set(course.course_id, course);
 
+      if (course.prerequisites == null) {
+        course.prerequisites = [];
+      }
+
       for (let i = 0; i < course.prerequisites.length; i++) {
         let credits_remaining = 0;
         let courses_remaining = 0;
@@ -533,9 +535,9 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
         let incomplete_prerequisites = [];
 
         for (let prerequisite_course of course.prerequisites[i]) {
-          if (!completed_courses.has(prerequisite_course.course_id)) {
+          if (!completed_courses.includes(prerequisite_course.course_id)) {
             courses_remaining++;
-            credits_remaining += parseInt(prerequisite_course.credits);
+            credits_remaining += parseFloat(prerequisite_course.credits);
             prerequisite_tuples.push([prerequisite_course.course_id, course.course_id]);
             incomplete_prerequisites.push(prerequisite_course.course_id);
           }
@@ -553,17 +555,18 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
       if (prerequisites_met) {
         continue
       }
-
-      for (let i = 0; i < prerequisite_options.length; i++) {
-        if (prerequisite_options[i].credits_remaining < min_credits_remaining || (prerequisite_options[i].credits_remaining == min_credits_remaining && prerequisite_options[i].courses_remaining < min_courses_remaining)) {
-          min_credits_remaining = prerequisite_options[i].credits_remaining;
-          min_courses_remaining = prerequisite_options[i].courses_remaining;
-          index_of_min = i;
+      else {
+        for (let i = 0; i < prerequisite_options.length; i++) {
+          if (prerequisite_options[i].credits_remaining < min_credits_remaining || (prerequisite_options[i].credits_remaining == min_credits_remaining && prerequisite_options[i].courses_remaining < min_courses_remaining)) {
+            min_credits_remaining = prerequisite_options[i].credits_remaining;
+            min_courses_remaining = prerequisite_options[i].courses_remaining;
+            index_of_min = i;
+          }
         }
+  
+        //prerequisite_options[index_of_min].incomplete_prerequisites.forEach(prerequisite => {curr_prerequisites.add(prerequisite)});
+        //prerequisite_options[index_of_min].prerequisite_tuples.forEach(tuple => {prerequisites_tuples.push(tuple)});
       }
-
-      prerequisite_options[index_of_min].incomplete_prerequisites.forEach(prerequisite => {curr_prerequisites.add(prerequisite)});
-      prerequisite_options[index_of_min].prerequisite_tuples.forEach(tuple => {prerequisites_tuples.push(tuple)});
     }
   }
 
@@ -682,3 +685,11 @@ export async function saveStudentPlan (student_id, plan_name, selected_fields, m
   }
   return 0;
 }
+
+let max_credits_per_quarter = 15;
+let mandatory_courses = ["CSC 4498", "CSC 4151", "CSC 4152", "CSC 3750", "UFDN 3100", "UCOR 2000", "UCOR 3000", "WRI 1000", "WRI 1100", "UFDN 1000", "UFDN 2000"];
+let completed_courses = ["CSC 2430", "CSC 2431", "CSC 3150", "CSC 3350"];
+let completed_credits = 20;
+
+
+console.log(createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits));

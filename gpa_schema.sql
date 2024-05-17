@@ -79,9 +79,9 @@ course_id VARCHAR(15),
 year YEAR,
 quarter ENUM('autumn', 'winter', 'spring', 'summer'),
 grade VARCHAR(4),
-credits DECIMAL(2, 1),
+credits DECIMAL(3, 1),
 PRIMARY KEY (enrollment_id),
-FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (student_id) REFERENCES student (student_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS student_plan (
