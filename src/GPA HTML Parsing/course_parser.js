@@ -17,6 +17,13 @@ export const courseParse = (input) => {
 
   const output = {};
 
+  const pageCrumbs = $('.crumbs');
+  const lastCrumb = pageCrumbs.find('span.lastValue');
+  if(lastCrumb.text() !== "Degree Check") {
+    return -1;
+  }
+
+
   //Student ID ignored for now
   output[`student_id`] = null;
 
