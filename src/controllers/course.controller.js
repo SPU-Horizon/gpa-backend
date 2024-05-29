@@ -95,7 +95,7 @@ export async function parseBanner(req, res) {
 
     try {
       // once destructured, we can pass the values into the addEnrollments function
-      let duplicate_fields = await addStudentField(
+      let duplicateFields = await addStudentField(
         student_id,
         field_name,
         field_type,
@@ -106,7 +106,7 @@ export async function parseBanner(req, res) {
         requirements
       );
 
-      if (!duplicate_fields) {
+      if (duplicateFields[0] < 0) {
         return res.status(500).send({
           error: "There was an error uploading your data to the database.",
         });
@@ -116,7 +116,7 @@ export async function parseBanner(req, res) {
       
     let majorRequirements = parsedRequirements.requirements;
     response.msg = "Parsed successfully";
-    response.data = { parsedCourses, majorRequirements, failedEnrollments, missingFields };
+    response.data = { parsedCourses, majorRequirements, failedEnrollments, missingFields, duplicateFields };
 
     } catch (error) {
       return res.status(500).send({
