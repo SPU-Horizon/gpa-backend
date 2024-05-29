@@ -114,7 +114,9 @@ export async function userExists(email) {
 // get array of student fields not found in the database
 // accepts student_id and parsedFields as parameters
 // returns an array of student fields that are not found in the database
-export async function getMissingFields (student_id, parsedFields) {
+export async function getMissingFields (student_id, parsed_fields) {
+  let missing_fields = [];
+
   try {
     let [student_fields] = await pool.query(
       `
@@ -124,10 +126,23 @@ export async function getMissingFields (student_id, parsedFields) {
       `,
       [student_id]
     );
+    
     // map the fields to their names
     student_fields = student_fields.map((field) => field.name);
     
-    return parsedFields.filter(field => !student_fields.includes(field));
+    for (let parsed_field of parsed_fields) {
+      let is_stored = false;
+      for (let stored_field of student_fields) {
+        if (stored_field.toLowerCase().includes(parsed_field.toLowerCase())) {
+          is_stored = true;
+          break;
+        }
+      }
+      if (!is_stored) {
+        missing_fields.push(parsed_field)
+      }
+    }
+    return missing_fields;
   }
   catch (error) {
     console.log(error);
@@ -175,14 +190,25 @@ export async function getUser(email) {
 
     let [fields] = await pool.query(
       `
-          SELECT student_field_id, name, type, year, quarter, requirements
+          SELECT student_field_id, name, type, year, quarter, ud_credits, total_credits, requirements
           FROM student_field
           WHERE student_id = ?
       `,
       [user.student_id]
     );
 
+    [[credits_row]] = await pool.query(
+      `
+      SELECT SUM(credits) AS earned_credits
+      FROM enrollment
+      WHERE enrollment.student_id = ? 
+      AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
+      `,
+      [user.student_id]
+    );
+
     user.fields = fields;
+    user.standing = currStanding(parseInt(credits_row.earned_credits));
 
     return user;
   } catch (error) {
