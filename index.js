@@ -13,6 +13,8 @@ import { userRouter } from "./src/routes/user.routes.js";
 import courseRoute from "./src/routes/course.routes.js";
 import planRoute from "./src/routes/plan.routes.js";
 import dotenv from "dotenv";
+import OpenAI from "openai/index.mjs";
+
 dotenv.config();
 
 const app = express();
