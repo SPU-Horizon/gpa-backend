@@ -44,6 +44,20 @@ export async function parseBanner(req, res) {
   const option = req.query.option;
 
   let parsedCourses = courseParse(file.path);
+
+  // If the parsedCourses is -1, then the banner page is invalid
+  if (parsedCourses == -1){
+    try {
+      await fs.unlink(file.path);
+    } catch (error) {
+      console.error("Error removing file:", error);
+    }  
+
+    return res.status(499).send({
+      error: "Invalid banner page",
+    });
+  }
+
   let failedEnrollments = [];
   let missingFields = [];
 
@@ -61,9 +75,6 @@ export async function parseBanner(req, res) {
     enrollments,
     field
   } = parsedCourses;
-
-  // Call getMissingFields
-  missingFields = await getMissingFields(student_id, field);
 
   try {
     // once destructured, we can pass the values into the addEnrollments function
@@ -86,6 +97,9 @@ export async function parseBanner(req, res) {
 
 
   if(option == "field") { //If this option is selected then we add the students field and requirements along with the courses
+
+    // Call getMissingFields
+    missingFields = await getMissingFields(student_id, field);
 
     let parsedRequirements = reqsParse(file.path);
     parsedRequirements.student_id = req.body.student_id;
@@ -116,7 +130,7 @@ export async function parseBanner(req, res) {
       
     let majorRequirements = parsedRequirements.requirements;
     response.msg = "Parsed successfully";
-    response.data = { parsedCourses, majorRequirements, failedEnrollments, missingFields, duplicateFields };
+    response.data = { parsedCourses, failedEnrollments, missingFields, duplicateFields };
 
     } catch (error) {
       return res.status(500).send({
@@ -126,14 +140,13 @@ export async function parseBanner(req, res) {
 
    } else { //option is "courses"
     response.msg = "Parsed successfully";
-    response.data = { parsedCourses, failedEnrollments };
+    response.data = { parsedCourses, failedEnrollments, missingFields };
    }
 
 
 
   try {
     await fs.unlink(file.path);
-    console.log("File removed successfully.");
   } catch (error) {
     console.error("Error removing file:", error);
   }
