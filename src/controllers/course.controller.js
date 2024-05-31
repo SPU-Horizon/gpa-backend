@@ -60,6 +60,7 @@ export async function parseBanner(req, res) {
 
   let failedEnrollments = [];
   let missingFields = [];
+  let duplicateFields = [];
 
   // Currently, we need to pass in a student_id, graduation_year, and graduation_quarter that are not being parsed correctly
   parsedCourses.student_id = req.body.student_id;
@@ -109,7 +110,7 @@ export async function parseBanner(req, res) {
 
     try {
       // once destructured, we can pass the values into the addEnrollments function
-      let duplicateFields = await addStudentField(
+      duplicateFields = await addStudentField(
         student_id,
         field_name,
         field_type,
@@ -140,7 +141,7 @@ export async function parseBanner(req, res) {
 
    } else { //option is "courses"
     response.msg = "Parsed successfully";
-    response.data = { parsedCourses, failedEnrollments, missingFields };
+    response.data = { parsedCourses, failedEnrollments, missingFields, duplicateFields };
    }
 
 
