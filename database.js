@@ -37,13 +37,13 @@ const currentQuarter = function () {
 };
 let currStanding = function (credits) {
   switch (true) {
-    case (credits < 45):
+    case credits < 45:
       return "freshman";
-    case (credits < 90):
+    case credits < 90:
       return "sophomore";
-    case (credits < 135):
+    case credits < 135:
       return "junior";
-    case (credits > 134):
+    case credits > 134:
       return "senior";
     default:
       return null;
@@ -77,14 +77,13 @@ let points_grade = function (letter_grade) {
       default:
         return null;
     }
-  }
-  else {
+  } else {
     return letter_grade;
   }
 };
 
 let quarter_increment = function (quarter, year) {
-  switch(quarter) {
+  switch (quarter) {
     case "winter":
       return ["spring", year];
     case "spring":
@@ -93,7 +92,7 @@ let quarter_increment = function (quarter, year) {
       return ["autumn", year];
     case "autumn":
       return ["winter", year + 1];
-  };
+  }
 };
 
 // check if a user exists
@@ -114,7 +113,7 @@ export async function userExists(email) {
 // get array of student fields not found in the database
 // accepts student_id and parsedFields as parameters
 // returns an array of student fields that are not found in the database
-export async function getMissingFields (student_id, parsedFields) {
+export async function getMissingFields(student_id, parsedFields) {
   try {
     let [student_fields] = await pool.query(
       `
@@ -127,9 +126,8 @@ export async function getMissingFields (student_id, parsedFields) {
     // map the fields to their names
     student_fields = student_fields.map((field) => field.name);
 
-    return parsedFields.filter(field => !student_fields.includes(field));
-  }
-  catch (error) {
+    return parsedFields.filter((field) => !student_fields.includes(field));
+  } catch (error) {
     console.log(error);
     return [];
   }
@@ -195,7 +193,15 @@ export async function getUser(email) {
 // accepts student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, and enrollments parameters
 // enrollments is an array of objects with course_id, year, quarter, grade, and credits properties
 // returns -1 if no enrollments were added, otherwise returns an array of failed enrollments
-export async function addEnrollments(student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, counselor_name, enrollments) {
+export async function addEnrollments(
+  student_id,
+  enrollment_year,
+  enrollment_quarter,
+  graduation_year,
+  graduation_quarter,
+  counselor_name,
+  enrollments
+) {
   try {
     await pool.query(
       `
@@ -217,12 +223,16 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
       WHERE student_id = ?
       `,
       [
-        enrollment_year, 
-        typeof enrollment_quarter === "string" ? enrollment_quarter.toLowerCase() : null, 
-        graduation_year, 
-        typeof graduation_quarter === "string" ? graduation_quarter.toLowerCase() : null, 
-        counselor_name, 
-        student_id
+        enrollment_year,
+        typeof enrollment_quarter === "string"
+          ? enrollment_quarter.toLowerCase()
+          : null,
+        graduation_year,
+        typeof graduation_quarter === "string"
+          ? graduation_quarter.toLowerCase()
+          : null,
+        counselor_name,
+        student_id,
       ]
     );
   } catch (error) {
@@ -257,6 +267,29 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
   return failedEnrollments;
 }
 
+export async function getCourseAggregation(course_ids) {
+  let course_offerings = [];
+  for (let i = 0; i < course_ids.length; i++) {
+    try {
+      let [stuff] = await pool.query(
+        `
+          SELECT c.course_id, c.name, c.credits, attributes, standing, prerequisites, corequisites, JSON_ARRAYAGG(JSON_OBJECT('quarter', s.quarter, 'year', s.year, 'classes', s.classes)) AS course_offerings
+          FROM course c
+          JOIN section s ON c.course_id = s.course_id
+          WHERE c.course_id = ?
+        `,
+        [course_ids[i]]
+      );
+
+      course_offerings.push(stuff[0]);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  return course_offerings;
+}
+
 // get all enrollments for a user
 // accepts student_id as parameter
 // returns an object with properties: current, past, future, and gpa
@@ -265,7 +298,10 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
 // future is an array of courses the student is registered to take in a later quarter
 // gpa is the student's 4.0 grade point average
 export async function getEnrollments(student_id) {
-  let past, current, future, completed_credits = 0;
+  let past,
+    current,
+    future,
+    completed_credits = 0;
   try {
     [future] = await pool.query(
       `
@@ -295,8 +331,7 @@ export async function getEnrollments(student_id) {
       `,
       [student_id]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return -1;
   }
@@ -306,10 +341,18 @@ export async function getEnrollments(student_id) {
   for (let course of past) {
     completed_credits += parseInt(course.credits);
     if (courseGrade.has(course.course_id)) {
-      courseGrade.set(course.course_id, {credits: course.credits, grade: Math.max(courseGrade.get(course.course_id).grade, points_grade(course.grade))});
-    }
-    else {
-      courseGrade.set(course.course_id, {credits: course.credits, grade: points_grade(course.grade)});
+      courseGrade.set(course.course_id, {
+        credits: course.credits,
+        grade: Math.max(
+          courseGrade.get(course.course_id).grade,
+          points_grade(course.grade)
+        ),
+      });
+    } else {
+      courseGrade.set(course.course_id, {
+        credits: course.credits,
+        grade: points_grade(course.grade),
+      });
     }
   }
 
@@ -321,23 +364,38 @@ export async function getEnrollments(student_id) {
       let credits = parseInt(course.credits);
       let grade = parseFloat(course.grade);
       totalCredits += credits;
-      qualityPoints += (grade * credits);
+      qualityPoints += grade * credits;
     }
   }
-  
+
   let gpa = 0;
 
   if (totalCredits != 0) {
     gpa = qualityPoints / totalCredits;
   }
 
-  return {current: current, past: past, future: future, gpa: gpa, completed_credits: completed_credits};
+  return {
+    current: current,
+    past: past,
+    future: future,
+    gpa: gpa,
+    completed_credits: completed_credits,
+  };
 }
 
 // add a new field for a student with its requirements in JSON format
 // accepts student_id, name, type, year, quarter, ud_credits, total_credits, and requirements as parameters
 // returns an array with status code and string message
-export async function addStudentField(student_id, name, type, year, quarter, ud_credits, total_credits, requirements) {
+export async function addStudentField(
+  student_id,
+  name,
+  type,
+  year,
+  quarter,
+  ud_credits,
+  total_credits,
+  requirements
+) {
   try {
     let [rows] = await pool.query(
       `
@@ -345,19 +403,12 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
       FROM student_field
       WHERE student_id = ? AND name = ? AND type = ? AND year = ? AND quarter = ?
       `,
-      [
-        student_id,
-        name,
-        type.toLowerCase(),
-        year,
-        quarter.toLowerCase()
-      ]
+      [student_id, name, type.toLowerCase(), year, quarter.toLowerCase()]
     );
 
     if (rows.length > 0) {
       return [1, "The uploaded field already exists."];
-    }
-    else {
+    } else {
       let all_courses = new Set();
       let course_details = new Map();
 
@@ -383,22 +434,30 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
       }
 
       for (let groupIndex = 0; groupIndex < requirements.length; groupIndex++) {
-        for (let optionIndex = 0; optionIndex < requirements[groupIndex].length; optionIndex++) {
-          for (let courseIndex = 0; courseIndex < requirements[groupIndex][optionIndex].courses.length; courseIndex++) {
-            let curr_course = requirements[groupIndex][optionIndex].courses[courseIndex];
+        for (
+          let optionIndex = 0;
+          optionIndex < requirements[groupIndex].length;
+          optionIndex++
+        ) {
+          for (
+            let courseIndex = 0;
+            courseIndex < requirements[groupIndex][optionIndex].courses.length;
+            courseIndex++
+          ) {
+            let curr_course =
+              requirements[groupIndex][optionIndex].courses[courseIndex];
 
             if (course_details.get(curr_course) != undefined) {
               requirements[groupIndex][optionIndex].courses[courseIndex] = {
                 course_id: curr_course,
                 name: course_details.get(curr_course).name,
-                credits: course_details.get(curr_course).credits
+                credits: course_details.get(curr_course).credits,
               };
-             }
-             else {
+            } else {
               requirements[groupIndex][optionIndex].courses[courseIndex] = {
                 course_id: curr_course,
                 name: "Course not found",
-                credits: 0
+                credits: 0,
               };
             }
           }
@@ -428,21 +487,22 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
         FROM student_field
         WHERE student_id = ? AND name = ? AND type = ?
         `,
-        [
-          student_id,
-          name,
-          type.toLowerCase()
-        ]
+        [student_id, name, type.toLowerCase()]
       );
 
-      return similar_fields.length > 1 ?
-        [1, "The uploaded field was saved succesfully, but there are other saved fields with the same name and type. The graduation requirements for the same field may have been uploaded for a different admit term."] :
-        [0, "The uploaded field was saved successfully."];
+      return similar_fields.length > 1
+        ? [
+            1,
+            "The uploaded field was saved succesfully, but there are other saved fields with the same name and type. The graduation requirements for the same field may have been uploaded for a different admit term.",
+          ]
+        : [0, "The uploaded field was saved successfully."];
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
-    return [-1, "The operation could not be completed. Please try again later."];
+    return [
+      -1,
+      "The operation could not be completed. Please try again later.",
+    ];
   }
 }
 
@@ -468,21 +528,43 @@ export async function deleteStudentField(student_field_id) {
 // create a plan for a student
 // accepts max_credits_per_quarter, mandatory_courses, completed_courses, and completed_credits as parameters
 // returns a plan for the student in the type of an array of objects with properties year, quarter, credits, and classes
-export async function createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits) {
+export async function createStudentPlan(
+  max_credits_per_quarter,
+  mandatory_courses,
+  completed_courses,
+  completed_credits
+) {
   let course_details = new Map();
-  ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'].forEach(course => {if (!completed_courses.has(course)) {mandatory_courses.add(course)}});
+  [
+    "WRI 1000",
+    "WRI 1100",
+    "UCOR 2000",
+    "UCOR 3000",
+    "UFDN 1000",
+    "UFDN 2000",
+    "UFDN 3100",
+  ].forEach((course) => {
+    if (!completed_courses.has(course)) {
+      mandatory_courses.add(course);
+    }
+  });
   let curr_prerequisites = new Set(mandatory_courses.values());
   let prerequisites_tuples = [];
   let current_year, current_quarter, curr_standing, available_sections;
-  [current_quarter, current_year] = quarter_increment(currentQuarter(), currentYear);
+  [current_quarter, current_year] = quarter_increment(
+    currentQuarter(),
+    currentYear
+  );
   let course_planned_quarter = new Map();
   let course_prerequisites = new Map();
-  let final_plan = [{
-    year: current_year,
-    quarter: current_quarter,
-    credits: 0,
-    classes: []
-  }];
+  let final_plan = [
+    {
+      year: current_year,
+      quarter: current_quarter,
+      credits: 0,
+      classes: [],
+    },
+  ];
 
   try {
     [available_sections] = await pool.query(
@@ -492,8 +574,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
       WHERE year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}")
       `
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return -1;
   }
@@ -509,8 +590,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
         `,
         [Array.from(curr_prerequisites)]
       );
-    }
-    catch (error) {
+    } catch (error) {
       console.log(error);
       return -1;
     }
@@ -520,7 +600,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
     for (let course of courses) {
       let prerequisite_options = [];
       let prerequisites_met = false;
-      let min_credits_remaining =  Number.MAX_SAFE_INTEGER;
+      let min_credits_remaining = Number.MAX_SAFE_INTEGER;
       let min_courses_remaining = Number.MAX_SAFE_INTEGER;
       let index_of_min = 0;
 
@@ -536,7 +616,10 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
           if (!completed_courses.has(prerequisite_course.course_id)) {
             courses_remaining++;
             credits_remaining += parseInt(prerequisite_course.credits);
-            prerequisite_tuples.push([prerequisite_course.course_id, course.course_id]);
+            prerequisite_tuples.push([
+              prerequisite_course.course_id,
+              course.course_id,
+            ]);
             incomplete_prerequisites.push(prerequisite_course.course_id);
           }
         }
@@ -544,34 +627,52 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
         if (courses_remaining == 0) {
           prerequisites_met = true;
           break;
-        }
-        else {
-          prerequisite_options.push({courses_remaining: courses_remaining, credits_remaining: credits_remaining, prerequisite_tuples: prerequisite_tuples, incomplete_prerequisites: incomplete_prerequisites});
+        } else {
+          prerequisite_options.push({
+            courses_remaining: courses_remaining,
+            credits_remaining: credits_remaining,
+            prerequisite_tuples: prerequisite_tuples,
+            incomplete_prerequisites: incomplete_prerequisites,
+          });
         }
       }
 
       if (prerequisites_met) {
-        continue
+        continue;
       }
 
       for (let i = 0; i < prerequisite_options.length; i++) {
-        if (prerequisite_options[i].credits_remaining < min_credits_remaining || (prerequisite_options[i].credits_remaining == min_credits_remaining && prerequisite_options[i].courses_remaining < min_courses_remaining)) {
+        if (
+          prerequisite_options[i].credits_remaining < min_credits_remaining ||
+          (prerequisite_options[i].credits_remaining == min_credits_remaining &&
+            prerequisite_options[i].courses_remaining < min_courses_remaining)
+        ) {
           min_credits_remaining = prerequisite_options[i].credits_remaining;
           min_courses_remaining = prerequisite_options[i].courses_remaining;
           index_of_min = i;
         }
       }
 
-      prerequisite_options[index_of_min].incomplete_prerequisites.forEach(prerequisite => {curr_prerequisites.add(prerequisite)});
-      prerequisite_options[index_of_min].prerequisite_tuples.forEach(tuple => {prerequisites_tuples.push(tuple)});
+      prerequisite_options[index_of_min].incomplete_prerequisites.forEach(
+        (prerequisite) => {
+          curr_prerequisites.add(prerequisite);
+        }
+      );
+      prerequisite_options[index_of_min].prerequisite_tuples.forEach(
+        (tuple) => {
+          prerequisites_tuples.push(tuple);
+        }
+      );
     }
   }
 
-  prerequisites_tuples.forEach(tuple => {
+  prerequisites_tuples.forEach((tuple) => {
     if (course_prerequisites.has(tuple[1])) {
-      course_prerequisites.set(tuple[1], course_prerequisites.get(tuple[1]).push(tuple[0]));
-    }
-    else {
+      course_prerequisites.set(
+        tuple[1],
+        course_prerequisites.get(tuple[1]).push(tuple[0])
+      );
+    } else {
       course_prerequisites.set(tuple[1], [tuple[0]]);
     }
   });
@@ -583,14 +684,19 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
 
   for (let course of sorted_courses) {
     let curr_course = course_details.get(course);
-    [current_quarter, current_year] = quarter_increment(currentQuarter(), currentYear);
+    [current_quarter, current_year] = quarter_increment(
+      currentQuarter(),
+      currentYear
+    );
     let earliest_quarter = 0;
 
     for (let prerequisite of course_prerequisites.get(course)) {
       if (course_planned_quarter.get(prerequisite) >= earliest_quarter) {
         for (let prerequisiteObj of curr_course.prerequisites.flat()) {
           if (prerequisiteObj.course_id == prerequisite) {
-            earliest_quarter = prerequisiteObj.concurrent_available ? course_planned_quarter.get(prerequisite) : course_planned_quarter.get(prerequisite) + 1;
+            earliest_quarter = prerequisiteObj.concurrent_available
+              ? course_planned_quarter.get(prerequisite)
+              : course_planned_quarter.get(prerequisite) + 1;
             break;
           }
         }
@@ -603,34 +709,54 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
       // }
 
       if (final_plan.length < index + 1) {
-        [current_quarter, current_year] = quarter_increment(final_plan[index - 1].quarter, final_plan[index - 1].year);
+        [current_quarter, current_year] = quarter_increment(
+          final_plan[index - 1].quarter,
+          final_plan[index - 1].year
+        );
         final_plan.push({
           year: current_year,
           quarter: current_quarter,
           credits: 0,
-          classes: []
+          classes: [],
         });
         future_completed_credits.push(future_completed_credits[index - 1]);
       }
 
       curr_standing = currStanding(future_completed_credits[index]);
 
-      if (course_details.get(course).standing.contains(curr_standing)
-      && final_plan[index].credits + curr_course.credits <= max_credits_per_quarter
-      && available_sections.find(section => section.course_id == course && section.year == final_plan[index].year && section.quarter == final_plan[index].quarter)) {
+      if (
+        course_details.get(course).standing.contains(curr_standing) &&
+        final_plan[index].credits + curr_course.credits <=
+          max_credits_per_quarter &&
+        available_sections.find(
+          (section) =>
+            section.course_id == course &&
+            section.year == final_plan[index].year &&
+            section.quarter == final_plan[index].quarter
+        )
+      ) {
         let course_and_corequisites = curr_course.corequisites;
         course_and_corequisites.append(course);
         for (let courseCode of course_and_corequisites) {
           let tempCourse = course_details.get(courseCode);
           tempCourse.prerequisites = [];
-          for (let prerequisite_course of course_prerequisites.get(courseCode)) {
-            tempCourse.prerequisites.push(course_details.get(prerequisite_course));
+          for (let prerequisite_course of course_prerequisites.get(
+            courseCode
+          )) {
+            tempCourse.prerequisites.push(
+              course_details.get(prerequisite_course)
+            );
           }
           final_plan[index].classes.push(tempCourse);
           final_plan[index].credits += course_details.get(courseCode).credits;
           course_planned_quarter.set(courseCode, index);
-          for (let i = index + 1; i < future_completed_credits.length - index - 1; i++) {
-            future_completed_credits[i] += course_details.get(courseCode).credits;
+          for (
+            let i = index + 1;
+            i < future_completed_credits.length - index - 1;
+            i++
+          ) {
+            future_completed_credits[i] +=
+              course_details.get(courseCode).credits;
           }
         }
         break;
@@ -644,7 +770,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
 // accepts student_id as parameter
 // returns an array of objects with properties plan_id, plan_name, selected_fields, max_credits, plan, and date_created
 // returns -1 if there was an error retrieving the student's plans
-export  async function getStudentPlan(student_id) {
+export async function getStudentPlan(student_id) {
   try {
     let [plans] = await pool.query(
       `
@@ -654,8 +780,7 @@ export  async function getStudentPlan(student_id) {
       `,
       [student_id]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return -1;
   }
@@ -666,7 +791,13 @@ export  async function getStudentPlan(student_id) {
 // save a student's plan
 // accepts student_id, plan_name, selected_fields, max_credits, and plan parameters
 // returns 0 if the plan was saved successfully, otherwise returns -1
-export async function saveStudentPlan (student_id, plan_name, selected_fields, max_credits, plan) {
+export async function saveStudentPlan(
+  student_id,
+  plan_name,
+  selected_fields,
+  max_credits,
+  plan
+) {
   try {
     await pool.query(
       `
@@ -675,8 +806,7 @@ export async function saveStudentPlan (student_id, plan_name, selected_fields, m
       `,
       [student_id, plan_name, selected_fields, max_credits, plan]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return -1;
   }
