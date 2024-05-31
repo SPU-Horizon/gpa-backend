@@ -1,4 +1,4 @@
-import { createStudentPlan, saveStudentPlan } from "../../database.js";
+import { createStudentPlan, saveStudentPlan, getStudentPlan } from "../../database.js";
 
 export async function createPlan(req, res) {
   // console.log("What is this?????", req.body);
@@ -22,15 +22,17 @@ export async function createPlan(req, res) {
 export async function savePlan(req, res) {
   console.log(req.body);
 
-  //const plan = await saveStudentPlan(req.body);
+  const {planName,planJson,studentID, max, selectedFields} = req.body.params;
+
+  const plan = await saveStudentPlan(studentID, planName, selectedFields, max, planJson);
   res.send(1);
   return;
 }
 
 export async function getPlan(req, res) {
-  const planId = req.params.id;
+  const studentID = req.params.id;
   try {
-    const plan = await someDatabaseFunctionToGetPlanById(planId);
+    const plan = await getStudentPlan(studentID);
     if (!plan) {
       return res.status(404).json({ message: "Plan not found" });
     }
