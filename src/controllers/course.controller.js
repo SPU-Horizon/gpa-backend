@@ -3,6 +3,7 @@ import {
   addEnrollments,
   addStudentField,
   deleteStudentField,
+  getMissingFields
 } from "../../database.js";
 import courseParse from "../GPA HTML Parsing/course_parser.js";
 import reqsParse from "../GPA HTML Parsing/reqs_parser.js";
@@ -98,6 +99,7 @@ export async function parseBanner(req, res) {
   if(option == "field") { //If this option is selected then we add the students field and requirements along with the courses
 
     // Call getMissingFields
+    missingFields = await getMissingFields(student_id, field);
 
     let parsedRequirements = reqsParse(file.path);
     parsedRequirements.student_id = req.body.student_id;
