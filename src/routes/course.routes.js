@@ -8,7 +8,6 @@ const router = express.Router();
 router.get("/getCourses", course.getClasses);
 
 // Parse Course Routes
-// Parser currently needs fixing --- will remove comment once fixed
 router.post("/parseBanner", upload.single("file"), course.parseBanner);
 
 router.delete("/drop-field", course.dropField);
