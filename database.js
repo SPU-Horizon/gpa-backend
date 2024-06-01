@@ -24,13 +24,13 @@ const currentYear = new Date().getFullYear();
 const currentQuarter = function () {
   switch (Math.floor(new Date().getMonth() / 3) + 1) {
     case 1:
-      return "winter";
+      return [2, "winter"];
     case 2:
-      return "spring";
+      return [3, "spring"];
     case 3:
-      return "summer";
+      return [4, "summer"];
     case 4:
-      return "autumn";
+      return [1, "autumn"];
     default:
       return null;
   }
@@ -133,7 +133,7 @@ export async function getMissingFields (student_id, parsed_fields) {
     for (let parsed_field of parsed_fields) {
       let is_stored = false;
       for (let stored_field of student_fields) {
-        if (stored_field.toLowerCase().includes(parsed_field.toLowerCase())) {
+        if (stored_field.includes(parsed_field)) {
           is_stored = true;
           break;
         }
@@ -197,12 +197,12 @@ export async function getUser(email) {
       [user.student_id]
     );
 
-    [[credits_row]] = await pool.query(
+    let [[credits_row]] = await pool.query(
       `
       SELECT SUM(credits) AS earned_credits
       FROM enrollment
       WHERE enrollment.student_id = ? 
-      AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
+      AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < ${currentQuarter()[0]}))
       `,
       [user.student_id]
     );
@@ -298,16 +298,17 @@ export async function getEnrollments(student_id) {
       SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
       FROM enrollment
       LEFT JOIN course ON enrollment.course_id = course.course_id
-      WHERE enrollment.student_id = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}"))
+      WHERE enrollment.student_id = ? AND (year > ${currentYear} OR (year = ${currentYear} AND quarter > ${currentQuarter()[0]}))
       `,
       [student_id]
     );
+
     [current] = await pool.query(
       `
       SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter
       FROM enrollment
       LEFT JOIN course ON enrollment.course_id = course.course_id
-      WHERE enrollment.student_id = ? AND year = ${currentYear} AND quarter = "${currentQuarter()}"
+      WHERE enrollment.student_id = ? AND year = ${currentYear} AND quarter = ${currentQuarter()[0]}
       `,
       [student_id]
     );
@@ -317,10 +318,29 @@ export async function getEnrollments(student_id) {
       SELECT enrollment.course_id AS course_id, name, description, enrollment.credits AS credits, attributes, year, quarter, grade
       FROM enrollment
       LEFT JOIN course ON enrollment.course_id = course.course_id
-      WHERE enrollment.student_id = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < "${currentQuarter()}"))
+      WHERE enrollment.student_id = ? AND (year < ${currentYear} OR (year = ${currentYear} AND quarter < ${currentQuarter()[0]}))
       `,
       [student_id]
     );
+
+    for (let course of future) {
+      if (course.name == null) {
+        course.name = "Legacy or transfer course"
+        course.description = "The description of this course is not available at this time."
+      }
+    }
+    for (let course of current) {
+      if (course.name == null) {
+        course.name = "Legacy or transfer course"
+        course.description = "The description of this course is not available at this time."
+      }
+    }
+    for (let course of past) {
+      if (course.name == null) {
+        course.name = "Legacy or transfer course"
+        course.description = "The description of this course is not available at this time."
+      }
+    }
   }
   catch (error) {
     console.log(error);
@@ -353,7 +373,7 @@ export async function getEnrollments(student_id) {
   
   let gpa;
 
-  totalCredits == 0 ? gpa = 0 : gpa = qualityPoints / totalCredits;
+  totalCredits == 0 ? gpa = 0 : gpa = Math.round(100 * qualityPoints / totalCredits) / 100;
   
   return {current: current, past: past, future: future, gpa: gpa, completed_credits: completed_credits};
 }
@@ -421,7 +441,7 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
              else {
               requirements[groupIndex][optionIndex].courses[courseIndex] = {
                 course_id: curr_course,
-                name: "Course not found",
+                name: "Legacy or transfer course",
                 credits: 0
               };
             }
@@ -498,7 +518,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
   let curr_prerequisites = new Set(mandatory_courses.values());
   let prerequisites_tuples = [];
   let current_year, current_quarter, curr_standing, available_sections;
-  [current_quarter, current_year] = quarter_increment(currentQuarter(), currentYear);
+  [current_quarter, current_year] = quarter_increment(currentQuarter()[1], currentYear);
   let course_planned_quarter = new Map();
   let course_prerequisites = new Map();
   let final_plan = [{
@@ -513,7 +533,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
       `
       SELECT section_id, course_id, year, quarter, classes, location, instructor
       FROM section
-      WHERE year > ${currentYear} OR (year = ${currentYear} AND quarter > "${currentQuarter()}")
+      WHERE year > ${currentYear} OR (year = ${currentYear} AND quarter > ${currentQuarter()[0]})
       `
     );
   }
@@ -612,7 +632,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
 
   for (let course of sorted_courses) {
     let curr_course = course_details.get(course);
-    [current_quarter, current_year] = quarter_increment(currentQuarter(), currentYear);
+    [current_quarter, current_year] = quarter_increment(currentQuarter()[1], currentYear);
     let earliest_quarter = 0;
 
     for (let prerequisite of course_prerequisites.get(course)) {
