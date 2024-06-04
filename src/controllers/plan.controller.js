@@ -6,13 +6,10 @@ export async function createPlan(req, res) {
   const { maxCredits, completedCredits, completedCourses, finalCourses } =
     req.body;
 
-  const newCompletedCourses = new Set(completedCourses);
-  const mandatoryCourses = new Set(finalCourses);
-
   const plan = await createStudentPlan(
     maxCredits,
-    mandatoryCourses,
-    newCompletedCourses,
+    finalCourses,
+    completedCourses,
     completedCredits
   );
   res.send(plan);
