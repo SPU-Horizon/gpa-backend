@@ -524,7 +524,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
   let course_details = new Map();
   let curr_prerequisites = new Set(mandatory_courses);
   let prerequisites_tuples = [];
-  let current_year, current_quarter, curr_standing, available_sections;
+  let current_year, current_quarter, curr_standing;
   [current_quarter, current_year] = quarter_increment(currentQuarter()[1], currentYear);
   let course_planned_quarter = new Map();
   let course_prerequisites = new Map();
@@ -534,21 +534,6 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
     credits: 0,
     classes: []
   }];
-
-  // get all available sections
-  try {
-    [available_sections] = await pool.query(
-      `
-      SELECT section_id, course_id, year, quarter, classes, location, instructor
-      FROM section
-      WHERE year > ${currentYear} OR (year = ${currentYear} AND quarter > ${currentQuarter()[0]})
-      `
-    );
-  }
-  catch (error) {
-    console.log(error);
-    return -1;
-  }
 
   // get all course prerequisites of each mandatory incomplete course iteratively
   while (curr_prerequisites.size > 0) {
@@ -669,11 +654,6 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
 
     // schedule the course in the earliest quarter it can be taken based on section availability
     for (let index = earliest_quarter; index < 24; index++) {
-      // TODO
-      // let section_exists = function () {
-      //   available_sections.find(section => section.course_id == course && section.year == final_plan[index].year && section.quarter == final_plan[index].quarter)
-      // }
-
       // add a new quarter to the plan if the current quarter has not been created yet
       if (final_plan.length == index) {
         [current_quarter, current_year] = quarter_increment(final_plan[index - 1].quarter, final_plan[index - 1].year);
@@ -689,62 +669,177 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
       let standing_met = course_details.get(course).standing.includes(currStanding(future_completed_credits[index]));
       let max_credits_met = curr_course.corequisites.reduce((sum, corequisite) => sum + course_details.get(corequisite).credits, 0) + curr_course.credits + final_plan[index].credits <= max_credits_per_quarter;
 
-      let course_available_sections = function(course_id, year, quarter) {
-        let sections = [];
-        for (let section of available_sections) {
-          if (section.course_id == course_id && section.year == year && section.quarter == quarter) {
-            sections.push(section);
-          }
+      let course_available_sections = async function(course_id, year, quarter) {
+        let course_available_sections;
+        // get all available sections
+        try {
+          [course_available_sections] = await pool.query(
+          `
+          SELECT section_id, course_id, year, quarter, classes, location, instructor
+          FROM section
+          WHERE year > ${currentYear} OR (year = ${currentYear} AND quarter > ${currentQuarter()[0]})
+          `
+          );
         }
-        return sections;
+        catch (error) {
+          console.log(error);
+          return -1;
+        }
+
+        if (course_available_sections.length == 0) {
+          // return false if no sections are available
+          return false;
+        }
+        else {
+          return course_available_sections.filter(section => section.year == year && section.quarter == quarter);
+        }
       }
 
-      let time_conflict = function() {}
+      // 
+      parse_time = function(time) {
+        let date_time = Date.now();
+        let time_split = time.split(":");
+        if (time_split[1].includes("PM")) {
+          date_time.setHours(parseInt(time_split[0]) + 12);
+          date_time.setMinutes(parseInt(time_split[1].slice(0, 2)));
+        }
+        else {
+          date_time.setHours(parseInt(time_split[0]));
+          date_time.setMinutes(parseInt(time_split[1].slice(0, 2)));
+        }
+        return date_time;
+      }
 
-      // new_course is an array of section objects from the available_sections array
-      // existing_courses is an array of arrays of sections objects from the available_sections array
+      // classes is an array of arrays -> each inner array contains class objects for one class
+      let time_conflict = function(classes) {
+        for (let i = 0; i < classes.length; i++) {
+          for (let j = i + 1; j < classes.length; j++) {
+            for (let class_i of classes[i]) {
+              for (let class_j of classes[j]) {
+                if (class_i.weekday != class_j.weekday || parse_time(class_i.start_time) > parse_time(class_j.end_time) || parse_time(class_i.end_time) < parse_time(class_j.start_time)) {
+                  continue;
+                }
+                else {
+                  // return true if there is a time conflict
+                  return true;
+                }
+              }
+            }
+          }
+        }
+        return false;
+      }
+
+      // new_course is an array of section objects from the course_available_sections array
+      // existing_courses is an array of arrays of sections objects from the course_available_sections array
       let class_schedule = function(new_course, existsing_courses) {
         if (existsing_courses.length > 1) {
-          // curr_schedule is an array of arrays of section objects
+          let final_schedule = [];
+          // viable_schedule is an array of arrays of section objects
           let viable_schedules = class_schedule(existsing_courses[0], existsing_courses[1]);
 
           if (viable_schedules == false) {
             return false;
           }
           else {
-            for (let section of new_course) {
+            for (let new_course_section of new_course) {
               for (let schedule of viable_schedules) {
-                //
+                let classes = [];
+                classes.push(new_course_section.classes);
+
+                for (let scheduled_section of schedule) {
+                  classes.push(scheduled_section.classes);
+                }
+
+                if (!time_conflict(classes)) {
+                  let temp = schedule;
+                  temp.push(new_course_section);
+                  final_schedule.push(temp);
+                }
               }
             }
           }
         }
         else {
-          //
+          for (let new_course_section of new_course) {
+            for (let existsing_course_section of existsing_courses[0]) {
+              let classes = [];
+              classes.push(new_course_section.classes);
+              classes.push(existsing_course_section.classes);
+
+              if (!time_conflict(classes)) {
+                let temp = schedule;
+                temp.push(new_course_section);
+                final_schedule.push(temp);
+              }
+            }
+          }
+        }
+
+        if (final_schedule.length == 0) {
+          return false;
+        }
+        else {
+          return final_schedule;
         }
       }
 
-      if (standing_met && max_credits_met
-      && available_sections.find(section => section.course_id == course && section.year == final_plan[index].year && section.quarter == final_plan[index].quarter)) {
-        let course_and_corequisites = curr_course.corequisites;
-        course_and_corequisites.append(course);
-        for (let courseCode of course_and_corequisites) {
-          let tempCourse = course_details.get(courseCode);
-          tempCourse.prerequisites = [];
-          for (let prerequisite_course of course_prerequisites.get(courseCode)) {
-            tempCourse.prerequisites.push(course_details.get(prerequisite_course));
+      let available_sections = await course_available_sections(course, final_plan[index].year, final_plan[index].quarter);
+
+      if (standing_met && max_credits_met && (available_sections === false || available_sections.length > 0)) {
+        let course_and_corequisites = [course];
+        for (let corequisite of curr_course.corequisites) {
+          course_and_corequisites.push(corequisite);
+        }
+
+        if (available_sections === false) {
+          for (let course_code of course_and_corequisites) {
+            final_plan[index].classes.push(course_details.get(course_code));
+            final_plan[index].credits += course_details.get(course_code).credits;
+            course_planned_quarter.set(course_code, index);
+            for (let i = index + 1; i < future_completed_credits.length - index - 1; i++) {
+              future_completed_credits[i] += course_details.get(course_code).credits;
+            }
           }
-          final_plan[index].classes.push(tempCourse);
-          final_plan[index].credits += course_details.get(courseCode).credits;
-          course_planned_quarter.set(courseCode, index);
-          for (let i = index + 1; i < future_completed_credits.length - index - 1; i++) {
-            future_completed_credits[i] += course_details.get(courseCode).credits;
+          break;
+        }
+        else {
+          let curr_courses_sections = [[available_sections]];
+          for (let corequisite of curr_course.corequisites) {
+            curr_courses_sections.push(await course_available_sections(corequisite, final_plan[index].year, final_plan[index].quarter));
+          }
+          for (let existing_courses of final_plan[index].classes) {
+            curr_courses_sections.push(await course_available_sections(existing_courses.course_id, final_plan[index].year, final_plan[index].quarter));
+          }
+
+          let final_schedule = class_schedule(curr_courses_sections[0], curr_courses_sections.slice(1));
+
+          if (final_schedule != false) {
+            for (let course_code of course_and_corequisites) {
+              final_plan[index].classes.push(course_details.get(course_code));
+              final_plan[index].credits += course_details.get(course_code).credits;
+              course_planned_quarter.set(course_code, index);
+              for (let i = index + 1; i < future_completed_credits.length - index - 1; i++) {
+                future_completed_credits[i] += course_details.get(course_code).credits;
+              }
+            }
+            for (let section of final_schedule) {
+              for (let scheduled_course of final_plan[index].classes) {
+                if (scheduled_course.course_id == section.course_id) {
+                  scheduled_course.section = section.section_id;
+                  scheduled_course.location = section.location;
+                  scheduled_course.instructor = section.instructor;
+                  scheduled_course.classes = section.classes;
+                }
+              }
+            }
+            break;
           }
         }
-        break;
       }
     }
   }
+
   console.log(final_plan);
   return final_plan;
 }
