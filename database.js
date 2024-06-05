@@ -887,8 +887,8 @@ export async function saveStudentPlan (student_id, plan_name, selected_fields, m
   return 0;
 }
 
-let max_credits_per_quarter = 15;
-let mandatory_courses = ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'];
-let completed_courses = [];
-let completed_credits = 0;
-console.log(createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits));
+// let max_credits_per_quarter = 15;
+// let mandatory_courses = ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'];
+// let completed_courses = [];
+// let completed_credits = 0;
+// console.log(createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits));
