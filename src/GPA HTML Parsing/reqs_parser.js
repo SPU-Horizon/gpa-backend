@@ -29,9 +29,8 @@ export const reqsParse = (input) => {
   } else {
     output[`field_type`] = "Major";
   }
-  output[`year`] = field.slice(
-    field.lastIndexOf("Catalog") - 8,
-    field.indexOf("Catalog") - 1
+  output[`year`] = Number(
+    field.slice(field.lastIndexOf("Catalog") - 8, field.indexOf("Catalog") - 4)
   ); // Catalog year
   let field_credits = $("div.heading").find("i").text().split(" ");
   output[`credits`] = Number(field_credits[0].slice(1)); // Total credits required
