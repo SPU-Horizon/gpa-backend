@@ -513,6 +513,7 @@ export async function deleteStudentField(student_field_id) {
 // accepts max_credits_per_quarter, mandatory_courses, completed_courses, and completed_credits as parameters
 // returns a plan for the student in the type of an array of objects with properties year, quarter, credits, and classes
 export async function createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits) {
+  console.log("INSIDE FUNCTION");
   try {
     // add general education courses to list of mandatory courses to take if not completed
     ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'].forEach(course => {
@@ -867,6 +868,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
         }
       }
     }
+    console.log("final_plan: ", final_plan);
     return final_plan;
   }
   catch (error) {
@@ -918,9 +920,9 @@ export async function saveStudentPlan (student_id, plan_name, selected_fields, m
   return 0;
 }
 
-let max_credits_per_quarter = 15;
-let mandatory_courses = ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'];
-let completed_courses = [];
-let completed_credits = 0;
-let result = await createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits);
-console.log(result);
+// let max_credits_per_quarter = 15;
+// let mandatory_courses = ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'];
+// let completed_courses = [];
+// let completed_credits = 0;
+// let result = await createStudentPlan(max_credits_per_quarter, mandatory_courses, completed_courses, completed_credits);
+// console.log(result);
