@@ -1,19 +1,14 @@
 import { createStudentPlan, saveStudentPlan } from "../../database.js";
 
 export async function createPlan(req, res) {
-  // console.log("What is this?????", req.body);
 
-  const { maxCredits, completedCredits, completedCourses, finalCourses } =
-    req.body;
-
-  const newCompletedCourses = new Set(completedCourses);
-  const mandatoryCourses = new Set(finalCourses);
+  const { max_credits, final_courses, completed_courses, completed_credits } = req.body.params;
 
   const plan = await createStudentPlan(
-    maxCredits,
-    mandatoryCourses,
-    newCompletedCourses,
-    completedCredits
+    max_credits,
+    final_courses,
+    completed_courses,
+    completed_credits
   );
   res.send(plan);
   return;

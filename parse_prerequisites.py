@@ -5,6 +5,7 @@ def parse_prerequisites(input):
     index = 0
     logic_state = True
     length = len(input)
+    
     while(index < length):
         index_of_parenthesis = input[index : index + 3].find("(") + index
         if (index_of_parenthesis >= index):
