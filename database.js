@@ -37,13 +37,13 @@ const currentQuarter = function () {
 };
 let currStanding = function (credits) {
   switch (true) {
-    case (credits < 45):
+    case credits < 45:
       return "freshman";
-    case (credits < 90):
+    case credits < 90:
       return "sophomore";
-    case (credits < 135):
+    case credits < 135:
       return "junior";
-    case (credits > 134):
+    case credits > 134:
       return "senior";
     default:
       return null;
@@ -77,14 +77,13 @@ let points_grade = function (letter_grade) {
       default:
         return null;
     }
-  }
-  else {
+  } else {
     return letter_grade;
   }
 };
 
 let quarter_increment = function (quarter, year) {
-  switch(quarter) {
+  switch (quarter) {
     case "winter":
       return ["spring", year];
     case "spring":
@@ -93,7 +92,7 @@ let quarter_increment = function (quarter, year) {
       return ["autumn", year];
     case "autumn":
       return ["winter", year + 1];
-  };
+  }
 };
 
 // check if a user exists
@@ -129,7 +128,7 @@ export async function getMissingFields (student_id, parsed_fields) {
     
     // map the fields to their names
     student_fields = student_fields.map((field) => field.name);
-    
+
     for (let parsed_field of parsed_fields) {
       let is_stored = false;
       for (let stored_field of student_fields) {
@@ -221,7 +220,15 @@ export async function getUser(email) {
 // accepts student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, and enrollments parameters
 // enrollments is an array of objects with course_id, year, quarter, grade, and credits properties
 // returns -1 if no enrollments were added, otherwise returns an array of failed enrollments
-export async function addEnrollments(student_id, enrollment_year, enrollment_quarter, graduation_year, graduation_quarter, counselor_name, enrollments) {
+export async function addEnrollments(
+  student_id,
+  enrollment_year,
+  enrollment_quarter,
+  graduation_year,
+  graduation_quarter,
+  counselor_name,
+  enrollments
+) {
   try {
     await pool.query(
       `
@@ -243,12 +250,16 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
       WHERE student_id = ?
       `,
       [
-        enrollment_year, 
-        typeof enrollment_quarter === "string" ? enrollment_quarter.toLowerCase() : null, 
-        graduation_year, 
-        typeof graduation_quarter === "string" ? graduation_quarter.toLowerCase() : null, 
-        counselor_name, 
-        student_id
+        enrollment_year,
+        typeof enrollment_quarter === "string"
+          ? enrollment_quarter.toLowerCase()
+          : null,
+        graduation_year,
+        typeof graduation_quarter === "string"
+          ? graduation_quarter.toLowerCase()
+          : null,
+        counselor_name,
+        student_id,
       ]
     );
   } catch (error) {
@@ -291,7 +302,10 @@ export async function addEnrollments(student_id, enrollment_year, enrollment_qua
 // future is an array of courses the student is registered to take in a later quarter
 // gpa is the student's 4.0 grade point average
 export async function getEnrollments(student_id) {
-  let past, current, future, completed_credits = 0;
+  let past,
+    current,
+    future,
+    completed_credits = 0;
   try {
     [future] = await pool.query(
       `
@@ -323,6 +337,7 @@ export async function getEnrollments(student_id) {
       [student_id]
     );
 
+
     for (let course of future) {
       if (course.name == null) {
         course.name = "Legacy or transfer course"
@@ -352,10 +367,18 @@ export async function getEnrollments(student_id) {
   for (let course of past) {
     course.credits == null ? pass : completed_credits += parseFloat(course.credits);
     if (courseGrade.has(course.course_id)) {
-      courseGrade.set(course.course_id, {credits: course.credits, grade: Math.max(courseGrade.get(course.course_id).grade, points_grade(course.grade))});
-    }
-    else {
-      courseGrade.set(course.course_id, {credits: course.credits, grade: points_grade(course.grade)});
+      courseGrade.set(course.course_id, {
+        credits: course.credits,
+        grade: Math.max(
+          courseGrade.get(course.course_id).grade,
+          points_grade(course.grade)
+        ),
+      });
+    } else {
+      courseGrade.set(course.course_id, {
+        credits: course.credits,
+        grade: points_grade(course.grade),
+      });
     }
   }
 
@@ -381,7 +404,16 @@ export async function getEnrollments(student_id) {
 // add a new field for a student with its requirements in JSON format
 // accepts student_id, name, type, year, quarter, ud_credits, total_credits, and requirements as parameters
 // returns an array with status code and string message
-export async function addStudentField(student_id, name, type, year, quarter, ud_credits, total_credits, requirements) {
+export async function addStudentField(
+  student_id,
+  name,
+  type,
+  year,
+  quarter,
+  ud_credits,
+  total_credits,
+  requirements
+) {
   try {
     let [rows] = await pool.query(
       `
@@ -389,19 +421,12 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
       FROM student_field
       WHERE student_id = ? AND name = ? AND type = ? AND year = ? AND quarter = ?
       `,
-      [
-        student_id,
-        name,
-        type.toLowerCase(),
-        year,
-        quarter.toLowerCase()
-      ]
+      [student_id, name, type.toLowerCase(), year, quarter.toLowerCase()]
     );
 
     if (rows.length > 0) {
       return [1, "The uploaded field already exists."];
-    }
-    else {
+    } else {
       let all_courses = new Set();
       let course_details = new Map();
 
@@ -427,18 +452,26 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
       }
 
       for (let groupIndex = 0; groupIndex < requirements.length; groupIndex++) {
-        for (let optionIndex = 0; optionIndex < requirements[groupIndex].length; optionIndex++) {
-          for (let courseIndex = 0; courseIndex < requirements[groupIndex][optionIndex].courses.length; courseIndex++) {
-            let curr_course = requirements[groupIndex][optionIndex].courses[courseIndex];
+        for (
+          let optionIndex = 0;
+          optionIndex < requirements[groupIndex].length;
+          optionIndex++
+        ) {
+          for (
+            let courseIndex = 0;
+            courseIndex < requirements[groupIndex][optionIndex].courses.length;
+            courseIndex++
+          ) {
+            let curr_course =
+              requirements[groupIndex][optionIndex].courses[courseIndex];
 
             if (course_details.get(curr_course) != undefined) {
               requirements[groupIndex][optionIndex].courses[courseIndex] = {
                 course_id: curr_course,
                 name: course_details.get(curr_course).name,
-                credits: course_details.get(curr_course).credits
+                credits: course_details.get(curr_course).credits,
               };
-             }
-             else {
+            } else {
               requirements[groupIndex][optionIndex].courses[courseIndex] = {
                 course_id: curr_course,
                 name: "Legacy or transfer course",
@@ -472,21 +505,22 @@ export async function addStudentField(student_id, name, type, year, quarter, ud_
         FROM student_field
         WHERE student_id = ? AND name = ? AND type = ?
         `,
-        [
-          student_id,
-          name,
-          type.toLowerCase()
-        ]
+        [student_id, name, type.toLowerCase()]
       );
 
-      return similar_fields.length > 1 ?
-        [1, "The uploaded field was saved succesfully, but there are other saved fields with the same name and type. The graduation requirements for the same field may have been uploaded for a different admit term."] :
-        [0, "The uploaded field was saved successfully."];
+      return similar_fields.length > 1
+        ? [
+            1,
+            "The uploaded field was saved succesfully, but there are other saved fields with the same name and type. The graduation requirements for the same field may have been uploaded for a different admit term.",
+          ]
+        : [0, "The uploaded field was saved successfully."];
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
-    return [-1, "The operation could not be completed. Please try again later."];
+    return [
+      -1,
+      "The operation could not be completed. Please try again later.",
+    ];
   }
 }
 
@@ -896,7 +930,7 @@ export async function createStudentPlan(max_credits_per_quarter, mandatory_cours
 // accepts student_id as parameter
 // returns an array of objects with properties plan_id, plan_name, selected_fields, max_credits, plan, and date_created
 // returns -1 if there was an error retrieving the student's plans
-export  async function getStudentPlan(student_id) {
+export async function getStudentPlan(student_id) {
   try {
     let [plans] = await pool.query(
       `
@@ -906,8 +940,7 @@ export  async function getStudentPlan(student_id) {
       `,
       [student_id]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return -1;
   }
@@ -918,7 +951,13 @@ export  async function getStudentPlan(student_id) {
 // save a student's plan
 // accepts student_id, plan_name, selected_fields, max_credits, and plan parameters
 // returns 0 if the plan was saved successfully, otherwise returns -1
-export async function saveStudentPlan (student_id, plan_name, selected_fields, max_credits, plan) {
+export async function saveStudentPlan(
+  student_id,
+  plan_name,
+  selected_fields,
+  max_credits,
+  plan
+) {
   try {
     await pool.query(
       `
@@ -927,14 +966,14 @@ export async function saveStudentPlan (student_id, plan_name, selected_fields, m
       `,
       [student_id, plan_name, selected_fields, max_credits, plan]
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error);
     return -1;
   }
   return 0;
 }
 
+// TESTING
 // let max_credits_per_quarter = 15;
 // let mandatory_courses = ['WRI 1000', 'WRI 1100', 'UCOR 2000', 'UCOR 3000', 'UFDN 1000', 'UFDN 2000', 'UFDN 3100'];
 // let completed_courses = [];

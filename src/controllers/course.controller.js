@@ -3,7 +3,7 @@ import {
   addEnrollments,
   addStudentField,
   deleteStudentField,
-  getMissingFields
+  getMissingFields,
 } from "../../database.js";
 import courseParse from "../GPA HTML Parsing/course_parser.js";
 import reqsParse from "../GPA HTML Parsing/reqs_parser.js";
@@ -44,8 +44,23 @@ export async function parseBanner(req, res) {
   const option = req.query.option;
 
   let parsedCourses = courseParse(file.path);
+
+  // If the parsedCourses is -1, then the banner page is invalid
+  if (parsedCourses == -1) {
+    try {
+      await fs.unlink(file.path);
+    } catch (error) {
+      console.error("Error removing file:", error);
+    }
+
+    return res.status(499).send({
+      error: "Invalid banner page",
+    });
+  }
+
   let failedEnrollments = [];
   let missingFields = [];
+  let duplicateFields = [];
 
   // Currently, we need to pass in a student_id, graduation_year, and graduation_quarter that are not being parsed correctly
   parsedCourses.student_id = req.body.student_id;
@@ -59,11 +74,8 @@ export async function parseBanner(req, res) {
     graduation_quarter,
     counselor,
     enrollments,
-    field
+    field,
   } = parsedCourses;
-
-  // Call getMissingFields
-  missingFields = await getMissingFields(student_id, field);
 
   try {
     // once destructured, we can pass the values into the addEnrollments function
@@ -84,60 +96,67 @@ export async function parseBanner(req, res) {
 
   const response = {};
 
+  if (option == "field") {
+    //If this option is selected then we add the students field and requirements along with the courses
 
-  if(option == "field") { //If this option is selected then we add the students field and requirements along with the courses
+    // Call getMissingFields
+    missingFields = await getMissingFields(student_id, field);
 
     let parsedRequirements = reqsParse(file.path);
+
     parsedRequirements.student_id = req.body.student_id;
 
     const { field_name, field_type, year, UD_credits, credits, requirements } =
-    parsedRequirements;
+      parsedRequirements;
 
     try {
       // once destructured, we can pass the values into the addEnrollments function
-      let duplicate_fields = await addStudentField(
+      duplicateFields = await addStudentField(
         student_id,
         field_name,
         field_type,
-        2022,
+        Number(year),
         enrollment_quarter,
         UD_credits,
         credits,
         requirements
       );
 
-      if (!duplicate_fields) {
+      if (duplicateFields[0] < 0) {
         return res.status(500).send({
           error: "There was an error uploading your data to the database.",
         });
       }
 
-
-      
-    let majorRequirements = parsedRequirements.requirements;
-    response.msg = "Parsed successfully";
-    response.data = { parsedCourses, majorRequirements, failedEnrollments };
-
+      let majorRequirements = parsedRequirements.requirements;
+      response.msg = "Parsed successfully";
+      response.data = {
+        parsedCourses,
+        failedEnrollments,
+        missingFields,
+        duplicateFields,
+      };
     } catch (error) {
       return res.status(500).send({
         error: "There was an issue uploading your data to the database.",
       });
     }
-
-   } else { //option is "courses"
+  } else {
+    //option is "courses"
     response.msg = "Parsed successfully";
-    response.data = { parsedCourses, failedEnrollments };
-   }
-
-
+    response.data = {
+      parsedCourses,
+      failedEnrollments,
+      missingFields,
+      duplicateFields,
+    };
+  }
 
   try {
     await fs.unlink(file.path);
-    console.log("File removed successfully.");
   } catch (error) {
     console.error("Error removing file:", error);
   }
 
   res.status(200).send(response);
 }
-

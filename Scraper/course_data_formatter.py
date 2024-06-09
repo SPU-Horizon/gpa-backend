@@ -1,7 +1,6 @@
 import pandas as pd
 import json
 
-# Beginning of your prereq work ********************************************************************************************************************
 def parse_prerequisites(input):
     prerequisites = []
     temp = []
@@ -69,7 +68,6 @@ def enumerate_prerequisites(input):
             prerequisite_options = curr_options
     return prerequisite_options
 
-# End of your prereq work ********************************************************************************************************************
 
 
 
